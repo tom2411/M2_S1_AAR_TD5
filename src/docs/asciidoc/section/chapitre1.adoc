@@ -1,0 +1,912 @@
+== ORM : gestion de la persitance des données
+
+=== ORM ?
+
+Il y a des différences fondamentales entre un tuple dans une table et un objet d’une classe
+
+* Pas d'héritage ou de polymorphisme en base de données
+* La gestion des associations est différente (one-to-many et many-to-many)
+* De nombreux types de données sont différents (par exemple il y a de nombreuses façons de stocker une String en base de données)
+* Les contraintes de validation ne sont pas gérées de la même manière
+
+Le but de la solution d'ORM sera d'alléger ou de simplifier ces problèmes
+
+=== Historique
+
+* 1994 : TopLink, premier ORM au monde, en SmallTalk
+* 1996 : TopLink propose une version Java
+* 1998 : EJB 1.0
+* 2000 : EJB 2.0
+* 2001 : lancement d’Hibernate, afin de proposer une alternative aux EJB 2
+* 2006 : EJB 3.0 et JPA 1.0
+* 2007 : TopLink devient EclipseLink
+* 2009 : JPA 2.0
+* 2013 : JPA 2.1
+* 2017 : JPA 2.2
+
+=== Les solutions pour le mapping O/R
+
+* Hibernate [natif]
+
+* JDO
+
+* Requêtes SQL : JDBC++
+
+* JPA
+
+
+// partie Hibernate
+
+== Hibernate
+
+Syntaxe particulière HQL
+
+Utilisable pour les EJB 2 / 3
+
+Soutenu par Jboss/Red Hat, pas par Sun/Oracle
+
+
+=== Définition du mapping O/R par .hbm
+
+Exemple : BooksShelf.hbm
+
+[source, xml]
+<hibernate-mapping package="com.loginmag.hibernate">
+  <class name="Book" table="books">
+    <meta attribute="class-description">
+		Cette classe représente un livre appartenant à une collection
+    </meta>
+    <id name="id" type="int" column="book_id">
+      <meta attribute="scope-set">protected</meta>
+      <meta attribute="field-description">
+        L'ISBN n'est pas utilisé comme id unique afin de pouvoir posséder plusieurs exemplaires d'un même ouvrage dans sa collection
+      </meta>
+      <generator class="native" />
+    </id>
+    <property name="author" type="string" not-null="true" />
+    <property name="title" type="string" not-null="true" />
+    <property name="cover" type="string" not-null="true">
+      <meta attribute="field-description">
+        Contient le chemin vers une image de la couverture. Ce chemin peut être une URL ou un chemin local
+      </meta>
+    </property>
+    <property name="published" type="date">
+      <meta attribute="field-description">Date de publication</meta>
+    </property>
+  </class>
+</hibernate-mapping>
+
+=== Génération du code java et bd
+
+A partir du fichier de mapping, il est possible de générer les classes :
+[source]
+java -classpath lib/hibernate2.jar:$CLASSPATH \
+    net.sf.hibernate.tool.hbm2java.CodeGenerator \
+	-output=src BooksShelf.hbm
+
+De même, outil de génération du schéma de la BD
+[source]
+java -classpath hibernate2.jar:$CLASSPATH:lib/hsqldb.jar:bin \
+ net.sf.hibernate.tool.hbm2ddl.SchemaExport BooksShelf.hbm
+
+=== Résultat
+
+[source,java]
+----
+public class Book implements Serializable {
+  /** identifier field */
+  private Integer id;
+  /** persistent field */
+  private String author;
+  /** persistent field */
+  private String title;
+  /** persistent field */
+  private String cover;
+  /** nullable persistent field */
+  private Date published;
+
+  /** full constructor */
+  public Book(String author, String title, String cover, Date published) {
+    this.author = author;
+    this.title = title;
+    this.cover = cover;
+    this.published = published;
+  }
+  // ...
+}
+----
+
+=== Pour la configuration
+
+Un fichier Hibernate.properties
+
+[source,properties]
+hibernate.dialect=net.sf.hibernate.dialect.HSQLDialect
+hibernate.connection.driver_class=org.hsqldb.jdbcDriver
+hibernate.connection.url=jdbc:hsqldb:db/books
+hibernate.connection.username=login
+hibernate.connection.password=vide
+
+
+=== Code de persistance
+
+[source,java]
+-----
+public class PersistData {
+  public static void main(String args[]) throws Exception {
+    Configuration config = new Configuration();
+    config.addFile(new File("BooksShelf.hbm"));
+
+    SessionFactory sessionFactory = config.buildSessionFactory();
+    Session session = sessionFactory.openSession();
+    Transaction transaction = null;
+    try {
+      transaction = session.beginTransaction();
+      Book book = new Book("Robert CALVET", "Les Japonais", "japonais.jpg");
+      session.save(book);
+      book = new Book("Terry PRATCHETT", "The Truth", "thetruth.jpg");
+      session.save(book);
+      transaction.commit();
+    } catch (Exception e) {
+
+    if (transaction != null) {
+        transaction.rollback();
+      }
+    } finally {
+      session.close();
+    }
+    sessionFactory.close();
+  }
+}
+-----
+
+=== Requêtes
+
+Langage proche de SQL
+
+Définition : exemple
+[source, xml]
+<query name="books.booksByAuthor">
+<![CDATA[from demo.Book as book where book.author=:author]]>
+</query>
+
+Utilisation
+
+[source,java]
+----
+Query query = session.getNamedQuery("books.booksByAuthor");
+query.setString("author", args[0]);
+List results = query.list();
+for (int i = 0; i < results.size(); i++)
+  System.out.println(((Book) results.get(i)).getTitle());
+----
+
+=== Hibernate natif
+
+cf http://www.hibernate.org
+
+
+
+// partie JDO
+
+== JDO
+
+Alternative proposée par Sun à Hibernate
+
+Une approche différente intéressante
+
+Des caractéristiques très intéressantes (fetch plans, ..) mais ce
+framework n'a été que peu utilisé !
+
+
+=== Un processus d'ehancement
+
+image::jdo.png[]
+
+
+=== JDO : composants principaux
+
+* Une « base de données » dans laquelle sont
+enregistrés les objets persistants
+
+* 2 types d’objets :
+** persistants
+(données de la BD)
+** éphémères (transients), non persistants
+
+Un gestionnaire de persistance gère la
+persistance des objets persistants
+
+Des méta-données, enregistrées dans un fichier
+XML, décrivent les classes des objets persistants
+
+=== JDO : ressources
+
+https://wiki.apache.org/jdo/FrontPage
+
+https://cloud.google.com/appengine/docs/java/datastore/jd
+o/dataclasses
+
+
+// partie SQL
+
+== SQL natif
+
+=== Utilisation de requêtes SQL natives
+
+* meilleur contrôle de la requête utilisée
+* meilleur contrôle du mapping
+* une _certaine_ indépendance du schéma de la BD / Structure des objets
+
+Mais
+
+* connaissance obligatoire de la structure de la BD
+* jointures manuelles
+* mapping manuel
+
+
+=== SQL natif : aides
+
+Utilisation de frameworks pour simplifier la tâche de mapping
+
+* Spring JDBC Template
+* JOOQ
+* QueryDSL
+
+=== Exemple de Spring JDBC Template
+
+
+
+// partie JPA
+
+== JPA
+
+* Annotations (ou orm.xml)
+* Utilisation dans ou hors container EJB (3)
+* Mêmes concepts que JDO/Hibernate
+* Norme « officielle »
+* C’est une spécification = Nécessite une implémentation
+** Hibernate
+** OpenJPA
+** EclipseLink : implémentation de référence pour JPA
+2.0 avec EclipseLink 2.0, 2.1 avec EclipseLink 2.5, …
+
+=== JPA : versions
+
+* JPA 1.0 [2006] :
+Annotations, qq Limitations,
+
+* JPA 2.0 [2009] :
+Detach et fetch !
+
+* JPA 2.1 [mai 2013] :
+Entity Graph pour fetch
+
+* JPA 2.2 [octobre 2017] :
+Stream, Java 8 Date Time ! CDI injection in `AttributeConverters`
+
+
+=== JPA : syntaxe
+
+* Cf cours Matthieu Exbrayat
+** JPA 1.0 = EJB 3.0
+** JPA 2.0 = EJB 3.1
+** JPA 2.1 = EJB 3.2
+
+* Richard Grin, Nice, JPA partie 1 et 2
+* Dzone : RefCard JPA (rc022 + rc128)
+
+
+=== JPA : une spécification
+
+Donc Nécessite une implémentation
+
+* Hibernate
+* EclipseLink : implémentation de référence
+* Autres [eg BD NoSQL]
+
+Annotations JPA utilisables directement par l’implémentation choisie
+
+=> Hibernate ou JDO avec des annotations !
+
+
+=== JPA : implémentation
+
+Hibernate est de très loin l’implémentation la plus répandue
+
+=> meilleur "support"
+
+Privilégier l’API JPA !
+Lorsque JPA n’est pas suffisant, on peut compléter avec l’API spécifique Hibernate (Non !)
+
+
+=== JPA : la base
+
+Annotations (XML possible) :
+[source, java]
+@Entity(name="user")
+@Id
+@GeneratedValue
+@OneToMany(mappedBy="user")
+public class User {...
+
+
+=== JPA : exemple simple
+
+[source, java]
+@Entity
+@Table(name = "personne")
+public class Person implements Serializable {
+	@Id
+	@Column(name = "id")
+	private String login;
+	private int followersCount;
+	private String avatarUrl;
+	// getters et setters
+}
+
+=== JPA : mapping
+
+Ce mapping utilise uniquement des annotations JPA qui se trouvent :
+
+* Au niveau de la classe, pour la mapper sur une table donnée
+* Au niveau des champs, qui correspondent aux colonnes de la table
+
+La configuration est en partie implicite
+
+* Les champs sans annotations sont par défaut mappés sur des colonnes ayant le même nom qu’eux
+Sinon, on peut les paramétrer avec l’annotation @Column
+
+* Si le champ ne doit pas être mappé, il faut le marquer avec @Transient
+
+Dans le cas le plus simple, il suffit d’annoter la classe avec @Entity et de définir la clé primaire avec @Id
+
+=== JPA : mapping XML
+
+Alternative : fichier orm.xml dans META-INF
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8" ?>
+<entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm"    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"     xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm    http://java.sun.com/xml/ns/persistence/orm_1_0.xsd"    version="1.0">
+<description>My First JPA XML Application</description>
+
+<package>entity</package>
+	<entity class="entity.Employee" name="Employee">                	<table name="EMPLOYEETABLE"/>
+		<attributes>
+			<id name="empId">
+				<generated-value strategy="TABLE"/>
+           </id>
+           <basic name="empName">
+                <column name="EMP_NAME" length="100"/>            			</basic>
+           <basic name="empSalary"> </basic>
+        </attributes>
+   </entity>
+</entity-mappings>
+----
+
+=== JPA : code d'accès
+
+* l'EntityManager est la classe principale, qui permet de requêter, créer ou supprimer des objets en base de données
+* La persistance est transparente : dès qu’un objet est géré par le EntityManager, ses modifications seront
+automatiquement répercutées en base de données _à la fin de la transaction_
+* Pour mettre à jour un objet, il suffit donc d’appeler ses setters, et d’attendre la fin de la transaction
+
+=== JPA : avec un container
+
+[source,java]
+----
+@ApplicationScoped
+public class PersonRepository {
+	@PersistenceContext
+	private EntityManager em;
+	public Person createOrUpdatePerson(Person person) {
+		return em.merge(person);
+	}
+	public List<Person> findAll() {
+		return em.createNamedQuery("findAllPersons").getResultList();
+	}
+	public Person findPerson(String login) {
+		return em.find(Person.class, login);
+	}
+ }
+----
+
+=== JPA : gestionnaire de persistance
+
+Gestionnaire de persistance :
+
+* Définir une (ou plusieurs PU) dans META-INF/persistence.xml
+[source,xml]
+<persitence-unit name="employes"
+	transaction-type="RESOURCE_LOCAL" >
+
+* Préciser le type de gestion de transaction : resource_local ou JTA [nécessite un conteneur avec support JTA]
+
+
+=== JPA : paramétrage d'accès
+
+Pour définir l’accès à la BD (paramètres de connection : driver, user, password, …), également 2 possibilités :
+
+* Définir ces paramètres par des properties dans persistence.xml
+* Définir un persistence.xml vide avec une référence (JNDI) à une DataSource définie dans le serveur d’application => LE MIEUX
+
+=== JPA : le code Java
+
+Récupération « à la main » dans le code du gestionnaire d’entités :
+
+[source,java]
+----
+EntityManagerFactory emf = Persistence.createEntityManagerFactory("employes");
+EntityManager em = emf.createEntityManager();
+
+EntityTransaction tx = em.getTransaction();
+tx.begin();
+Dept dept = new Dept("Orleans");
+em.persist(dept);
+dept.setLieu("Paris");
+tx.commit();
+em.close();
+emf.close();
+----
+
+=== JPA : accès aux champs
+
+En Java, il est conseillé d’utiliser plutôt les accesseurs
+que les accès directs aux champs (meilleur contrôle des valeurs)
+
+Pour JPA c’est différent : l’accès par accesseur oblige à avoir des setters et getters pour toutes les propriétés, ce qui peut être néfaste et aller à l’encontre du souci d’encapsulation
+
+Par exemple, les setters peuvent permettre à l’utilisateur de ne pas utiliser une méthode ajoutée pour obliger à bien mettre à jour les 2 bouts d’une association bidirectionnelle
+
+[%notitle]
+=== suite
+
+L’accès par champ permet de distinguer l’accès aux attributs par JPA
+et l’accès aux attributs par l’application (effectué par setters et getters)
+
+Il est donc conseillé de choisir plutôt l’accès par champ avec JPA
+
+Pour des cas particuliers il est toujours possible d’utiliser @Access(PROPERTY) sur certains attributs ;
+mais attention, un traitement complexe dans un setter peut occasionner un problème s’il dépend de la valeur d’autres attributs (pas nécessairement initialisés à ce moment)
+
+=== JPA : compléments
+
+Attribut Temporel : type *obligatoire* dans l’annotation
+[source,java]
+@Temporal(TemporalType.DATE)
+private Calendar dateEmb;
+
+Binaire :
+[source,java]
+@Lob
+@Basic(fetch = FetchType.LAZY)
+private byte[] cvPdf
+
+Enumerations :
+[source,java]
+@Enumerated(EnumType.STRING)
+private TypeEmploye typeEmploye;
+
+=== JPA :
+
+Persistance par transitivité : Attention, pas par défaut !
+
+Cohérence à maintenir « manuellement » lors des commits
+
+Choix *explicite* du mode par attribut cascade dans mapping : PERSIST, REMOVE, REFRESH, ALL
+
+=== JPA :
+
+[source,java]
+----
+@OneToMany(
+  cascade = CascadeType.PERSIST)
+private Collection<Employe> employes;
+
+@OneToMany(
+  cascade = { CascadeType.PERSIST,
+				 CascadeType.MERGE },
+  mappedBy = "client")
+private Collection<Facture> factures;
+----
+
+=== JPA :
+Types déclarés diff implem dans les 1-n !
+[source,java]
+@Entity
+public class Person implements Serializable {
+	@Id
+	private String login;
+	private int followersCount;
+	@OneToMany
+	private Set<Repository> repositories =
+			new HashSet<Repository>();
+	// getters et setters
+}
+
+=== JPA : Embeddable
+
+[source,java]
+@Entity
+public class Customer {
+    @Id
+    int id;
+    @Embedded
+    CustomerInfo info;
+}
+@Embeddable
+public class CustomerInfo {
+  String name;
+  int credit;
+  @Lob
+  Image photo;
+}
+
+=== JPA : fetch
+
+Récupération d’entités par query/find : que faire pour les entités connectées ?
+
+Choix du mode laissé par JPA : LAZY, EAGER
+Défaut : EAGER pour lien vers 1, LAZY pour les autres (eg la facture -> le client EAGER, le client mais les factures en LAZY)
+
+Attibut fetch dans l’association pour fixer
+[source,java]
+@OneToMany(mappedBy = "departement",
+					 fetch = FetchType.EAGER)
+private Collection<Employe> employes;
+
+=== JPA : héritage
+
+Héritage : 2 stratégies possibles
+
+* Une seule table pour la hiérarchie avec des champs « optionnels » (SINGLE_TABLE, défaut)
+* Une table par classe, avec jointure 1-1 (JOINED) ou pour les classes concrètes (TABLE_PER_CLASS)
+
+[source,java]
+@Entity
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
+public abstract class Personne {...}
+
+=== JPA : transactions
+
+* Transactions
+** Locales à une ressources (JDBC) : une BD
+** JTA : plusieurs BD en même temps
+
+* Gestion des transactions par un conteneur (JEE, Spring) ou sans (java SE), à la main (JTA pas obligatoirement supporté)
+[source,java]
+EntityManagerFactory emf = Persistence.createEntityManagerFactory("PU");
+EntityManager em = emf.createEntityManager();
+EntityTransaction tx = em.getTransaction();
+try {
+  tx.begin()
+  ...
+  tx.commit();
+}
+finally {
+  em.close();
+}
+
+=== JPA : concurrence
+
+Concurrence : 2 transactions modifient et valident des modifications sur un objet persisté
+
+Gestion possible par n° de version : un attribut (int, Integer,…) annoté par @Version
+
+* Incrémenté automatiquement par JPA à chaque modification
+* Vérification de commit : le n° de version de l’entité doit correspondre ! (levée d’exception)
+[source,java]
+@Version
+private int laVersion;
+
+
+== JPA 2
+
+* Collection d'éléments
+* Suppression des orphelins
+* Requêtes typées
+* Cache L2
+* Bean Validation
+* l'API Criteria
+
+
+=== JPA 2 : collections
+
+* Nouvelle annotation @ElementCollection
+* Stocke des types de base : String, Integer
+* Pratique car on ne veut pas toujours des collections d'objets complexes
+* Les objets sont stockés dans une « table de collection » (configurable avec @CollectionTable, sinon nommée <nom_entité>_<nom_attribut>)
+[source,java]
+@Entity
+public class Person {
+	@ElementCollection
+	private Collection<String> emails;
+}
+
+=== JPA 2 : orphelins
+
+* Suppression automatique des orphelins (eg lignes de factures sans facture)
+* Attribut orphanRemoval à true dans @OneToMany
+Suppression au moment du flush
+[source,java]
+@Entity
+public class Facture {
+  ...
+  @OneToMany(mappedBy="facture",
+	cascade=ALL, orphanRemoval= "true")
+	private Collection<LigneFacture> lignes;
+	...
+}
+
+=== JPA 2 : TypedQuery
+
+Une évolution très simple mais très pratique, qui évite d'avoir à faire un cast
+sur le type de retour d'une requête
+Il suffit pour cela d'utiliser la nouvelle interface TypedQuery
+[source,java]
+TypedQuery<Person> query =
+	em.createNamedQuery("findCurrentEmployees", Person.class);
+List<Person> currentEmployees = query.getResultList();
+
+=== JPA 2 : cache
+
+L'utilisation d'un cache de niveau 2 est désormais possible avec l'API standard,
+avec l'annotation @Cacheable
+
+Evite de trop se lier à l'API d'un provider JPA ou d'un cache spécifique
+
+Dans la pratique, la configuration la plus complexe reste au niveau du gestionnaire de cache, auquel on reste tout de même très lié
+
+=== JPA 2 : bean validation
+
+Bean Validation, JSR 303, utilisée en dehors d'un contexte JPA (pour valider des modèles MVC par exemple)
+
+Mais elle est particulièrement pertinente dans le cadre de JPA
+
+Fonctionne automatiquement par défaut
+
+Permet de renforcer ses objets, et d'éviter d'avoir un modèle anémique
+
+=== JPA 2 : bean validation
+
+[source,java]
+----
+public class Utilisateur {
+	@NotNull
+	private String login;
+
+	@Size(min = 8, max = 16)
+	private String mdp;
+
+	@Past
+	private Date dateDeNaissance;
+	//Constructeurs, getters et setters
+}
+----
+
+=== JPA 2 : bean validation
+
+Définir ses propres validators
+[source,java]
+----
+@Target({METHOD,FIELD,ANNOTATION_TYPE })
+@Retention(RUNTIME)
+@Documented
+@Pattern(regexp = "^\\(?([0-9]{3})\\)?([ .-]?)([0-9]{3})\\2([0-9]{4})$", message = "{error.validation.phonenumber}")
+public @interface PhoneNumber {
+}
+----
+
+=== JPA 2 : bean validation
+
+[source,java]
+----
+Utilisateur user = new Utilisateur();
+… mauvais set
+Validator validator =
+    Validation.buildDefaultValidatorFactory().getValidator();
+Set<ConstraintViolation<Utilisateur>> violations =
+    validator.validate(user);
+System.out.println("Nb de violations : " + violations.size());
+for (ConstraintViolation constraintViolation : violations) {
+	System.out.println("Valeur '"+
+	    constraintViolation.getInvalidValue() +
+	    "' incorrecte pour '"+
+	    constraintViolation.getPropertyPath() +
+	    "' : " + constraintViolation.getMessage());
+}
+----
+
+=== JPA 2 : API Criteria
+
+* De loin l'ajout le plus complexe apporté par JPA 2.0
+* Permet de construire ses requêtes dynamiquement, avec une API Java
+* N'est pas un remplacement de JPQL, mais une autre manière de requêter
+** Par exemple, elle est utile pour les formulaires de recherche complexes, où l'utilisateur peut ajouter/modifier/supprimer des critères
+* Utilisation d’un méta-modèle ( MaClasse_.java )
+
+=== JPA 2 : API Criteria
+
+[source,java]
+----
+    public List<Client> findRange(int[] range) {
+        CriteriaQuery<Client> cq =
+            em.getCriteriaBuilder().createQuery(Client.class);
+        cq.select(cq.from(Client.class));
+        javax.persistence.Query q = em.createQuery(cq);
+        q.setMaxResults(range[1] - range[0]);
+        q.setFirstResult(range[0]);
+        return q.getResultList();
+    }
+----
+
+
+=== JPA 2 : converters
+
+* @Temporal pour gérer (mal) les Date/GregorianCalendar de java 7
+* Java 8 : refonte de l’API (Instant, LocalDate, …)
+* Pas de support natif JPA 2.1
+* Ajout de Converter obligatoire
+
+=== JPA 2 : converters
+
+[source,java]
+----
+import java.time.*;
+import java.util.Date;
+import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
+@Converter(autoApply = true)
+public class DateConverter implements AttributeConverter<LocalDate, Date> {
+ 	@Override
+	public Date convertToDatabaseColumn(LocalDate date) {
+	 Instant instant = date.atStartOfDay().
+			atZone(ZoneId.systemDefault()).toInstant();
+	 return Date.from(instant);
+	}
+	@Override
+	public LocalDate convertToEntityAttribute(Date date) {
+	 Instant instant = Instant.ofEpochMilli(date.getTime());
+    return LocalDateTime.ofInstant(instant, 		ZoneId.systemDefault()).toLocalDate();
+	}
+}
+----
+
+== ORM : problèmes réccurents
+
+Deux problèmes classiques :
+
+* Problème du LAZY loading : génération d’exceptions lors de la navigation ou rapatriement de la structure complète -> performances
+* VO /DTO : écriture laborieuse et répétitive, perte de performances
+
+=== ORM : lazy loading
+
+Problème lors de la récupération d’une instance d’un objet :
+
+* Charger seulement quand nécessaire les objets dépendants [navigation] : problèmes d’exceptions, de performances (nombreux selects), mais aussi de transmission (detach)
+* Charger tout, mais inutile dans beaucoup de cas
+
+=> Nécessité de définir des cas d’utilisation de navigation différents !
+
+=== lazy loading en JDO
+
+Les fetch groups définissent explicitement quelles instances de classes doivent être récupérées (chargées) en même temps que l'instance.
+
+Cette récupération étendue peut être nécessaire pour transmettre des objets mais aussi pour indiquer au driver JDO que l'on avoir besoins de ces instances et qu'il doit les récupérer en une seule fois (optimisation possible au niveau de l'implémentation)
+
+=== Lazy loadind en JPA
+
+Définition globale dans l’annotation (Fetch), mais garder LAZY pour les collections
+
+Utilisation dans une requête du « join fetch » pour forcer à ramener tout de suite les entités liées (en lazy, provoquera N select en plus sinon !!)
+
+[source, java]
+select e from Employe e join fetch e.departement
+
+e.getDepartement() -> plus de select exécuté !
+
+=== Les VO/DTO
+
+Objets retournés sont en lien + ou - direct avec la source de données : pb pour les transmettre à une page JSP....
+
+Généralement : créer une famille de Java Bean presque identiques au modèle. Ce pattern est connu sous le nom de DTO (Data Transfert Object) ou VO (Value Object).
+
+=> Beaucoup d'objets et de services qui font le transfert modèle DTO <-> modèle persisté !!!
+
+=== Les VO/DTO en JPA
+
+Entités détachées :
+
+* Détachement de l’entité puis envoie couche cliente (clear)
+* Rattachement de l’entité retournée modifiée pour enregistrement
+* Méthode merge de EntityManager :
+	<T> T merge(T entité)
+* Attention, l’entité passée en paramètre n’est pas rattachée ; c’est l’entité renvoyée par la méthode merge qui est rattachée
+* Attention au LAZY dans les associations !!!!!!
+
+=== Cycle de vie
+
+[.thumb]
+image::jpa-state.png[scaledwidth=100%]
+
+
+=== JPA : Criteria
+
+Deux API de requête en JPA :
+
+* JPQL : simple mais limité (retour Objets persistés)
+* Criteria : plus complet et complexe
+
+Nécessité pour Criteria d’accès au Méta-modèle
+
+* Génération du méta-modèle à partir des classes du modèle (avec _, eg User.java -> User_.java)
+* Attention avec Maven, ajout de la génération de ces classes (eg hibernate-jpamodelgen en dep)
+
+=== JPA : méta-modèle Criteria
+
+[source,java]
+----
+import javax.annotation.Generated;
+import javax.persistence.metamodel.CollectionAttribute;
+import javax.persistence.metamodel.SingularAttribute;
+import javax.persistence.metamodel.StaticMetamodel;
+
+@Generated(value="Dali", date="2013-11-01T23:12:54.344+0100")
+@StaticMetamodel(Client.class)
+public class Client_ {
+	public static volatile SingularAttribute<Client, Long> id;
+	public static volatile SingularAttribute<Client, String> nom;
+	public static volatile SingularAttribute<Client, String> prenom;
+	public static volatile SingularAttribute<Client, String> adresse;
+	public static volatile CollectionAttribute<Client, Compte> comptes;
+}
+----
+
+=== JPA : utilisation du méta-modèle
+
+Utilisation du méta-modèle dans les requêtes
+[source,java]
+----
+CriteriaQuery q = getBuilder().createQuery(Client.class);
+Root client = q.from(Client.class);
+q.select(client);
+q.where(q.equal(client.get(Client_.nom), “Exbrayat"));
+return getEm().createQuery(q).getResultList();
+----
+
+
+=== JPA : transactions
+
+[source,java]
+----
+em.getTransaction().begin();
+String ordre =
+"update Employe e " +
+" set e.salaire = e.salaire * 1.05";
+Query q = em.createQuery(ordre);
+int nbEntitesModif = q.executeUpdate();
+em.getTransaction().commit();
+----
+Cf Richard Grin, Nice, JPA partie 2
+http://deptinfo.unice.fr/~grin/mescours/minfo/modpersobj/supports/index.html
+
+=== DAO
+
+* DAO
+** Contient TOUT le code lié à la persistance
+** Utilisé par la Facade/Service
+** En général, une DAO par Classe persistée (generics) ou par sous-domaine fonctionnel
+** CRUD : create, retrieve, update, delete
+* Paramètres
+** Suite de champs (id, nom, …)
+** VO
+** Objet métier
+* Retour
+** Void, boolean, id, objet persisté ou VO,List, ResultSet…
+
+=== DAO : rôles
+
+Cacher les exceptions de bas niveau (SQL)
+
+Gestion des transactions : dans DAO ou dans service si nécessité de plusieurs appels DAO (eg virement)

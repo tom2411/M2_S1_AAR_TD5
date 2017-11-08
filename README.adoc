@@ -1,0 +1,21 @@
+= cours d'AAR - master 2 MIAGE/Info
+
+Documents du cours d'AAR - Architectures Applicatives Réparties
+
+
+== Slides et exemples du cours
+
+Les documents du cours sont en asciidoc dans _docs/asciidoc_
+et les codes sources des démos dans _src/main/java_.
+
+== Usage
+
+Pour générer les slides et le pdf du cours, Maven, what else ?
+
+ $ mvn
+
+Pour voir les slides, ouvrir _target/generated-slides/cours.html_
+
+Pour le pdf, ouvrir _target/generated-docs/cours.pdf_
+
+Pour le code des exemples, ils sont dans _src/main/java_, tout simplement !

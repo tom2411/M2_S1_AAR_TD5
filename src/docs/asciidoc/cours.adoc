@@ -1,0 +1,134 @@
+= cours d'AAR : Architectures Applicatives Réparties
+Frédéric Moal <frederic.moal@univ-orleans.fr>
+v1.0, 2017-10-26: une première version
+:example-caption!:
+ifndef::imagesdir[:imagesdir: images]
+ifndef::sourcedir[:sourcedir: ../../main/java]
+// reveal options ; cf https://github.com/asciidoctor/asciidoctor-reveal.js/
+:revealjs_theme: white
+:revealjs_transition: linear
+
+[.text-left]
+
+== Le cours
+
+Code source du cours en asciidoc http://www.methods.co.nz/asciidoc/
+
+
+
+pour générer les slides ET un support pdf : `mvn`
+
+pour prendre des notes : annoter le pdf ou modifier le source par exemple avec une balise [NOTE]
+
+
+https://orleans.miage.fr/confluence/display/jee/Architectures+n-tiers
+
+[NOTE.speaker]
+Une note .speaker est incluse dans le pdf généré mais n'apparait pas explicitement dans les slides
+
+
+== Pendant la présentation des slides...
+
+* Press the `*s*` key to access speaker notes
+* You can press `*b*` or `*.*` to blank/unblank your current screen
+* Press the `*esc*` key to get an overview of your slides
+* Press the down arrow key to see the next sub-slide (if exist !)
+
+[NOTE.speaker]
+--
+Les notes de slides sont visibles dans la fenêtre speaker, mais aussi dans le poly pdf
+--
+
+
+
+== Sources
+
+* ORM
+** http://www.hibernate.org
+** http://www.eclipse.org/eclipselink/
+* Frameworks
+** http://spring.io
+** https://github.com/javaee-samples/javaee7-samples
+* Veille techno
+*** blogs : xebia,ippon,octo...
+*** dzone.com /developpez
+***	Devoxx(FR) sur
+***	http://lescastcodeurs.com/
+*** twitter
+
+
+== Historique : persistance Java
+
+|===
+|JDK|JEE|Autre
+
+| JDK 1.0 : java.io, java.util.Properties
+
+JDK 1.1 : Sérialisation des objets, JDBC
+
+JSR 12, JDO 1.0, 2002
+
+JSR 243, JDO 2.0, 2006
+
+JSR 222, JAXB 2.0, 2006
+
+| EJB 1.0, 1998, gestion des transactions distribuées
+
+JSR 19, EJB 2.0, 2001
+
+JSR 244, JEE 5, 2006 avec EJB 3.0, JPA 1.0
+
+JSR 316, JEE 6, 2009 avec EJB 3.1, JPA 2.0, CDI 1.0
+
+JSR 342, JEE 7, 2013 avec EJB 3.2, JPA 2.1, CDI 1.1
+
+| Hibernate, contre EJB2, 2001
+
+Hibernate 2, 2003 [JBoss]
+
+Hibernate 3, 2005
+
+Hibernate 3.5, certifié JPA 2.0
+
+Hibernate Core 4, 2011
+
+Hibernate ORM 4.3, 2013, JPA 2.1
+
+Hibernate ORM 5, 2015, Java 8
+|===
+
+
+
+== Architectures n-tiers
+
+[.thumb]
+image::archi-n-tiers.png[scaledwidth=100%]
+
+
+== Persistance en BD
+
+Attention, deux rôles bien distincts :
+
+* Le Mapping O/R, sauvegarde et restauration des objets [Java] en BD[R]
+
+=> première partie de ce cours
+
+* La supervision des liens avec la BD : gestion des transactions, concurrence, sécurité…
+
+=> deuxième partie de ce cours
+
+
+== Architecture classique
+
+[.thumb]
+image::archi-classique.png[scaledwidth=75%]
+
+
+
+// Les chapitres
+
+include::section/chapitre1.adoc[]
+
+//include::section/chapitre2.adoc[]
+
+
