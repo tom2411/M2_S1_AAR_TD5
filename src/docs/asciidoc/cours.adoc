@@ -12,14 +12,13 @@ ifndef::sourcedir[:sourcedir: ../../main/java]
 
 == Le cours
 
-Code source du cours en asciidoc http://www.methods.co.nz/asciidoc/
+CAUTION: Code source du cours en Asciidoc
 
-
+https://orleans.miage.fr/stash/projects/ARCHI/repos/coursaar/
 
 pour générer les slides ET un support pdf : `mvn`
 
 pour prendre des notes : annoter le pdf ou modifier le source par exemple avec une balise [NOTE]
-
 
 https://orleans.miage.fr/confluence/display/jee/Architectures+n-tiers
 
@@ -49,13 +48,15 @@ Les notes de slides sont visibles dans la fenêtre speaker, mais aussi dans le p
 * Frameworks
 ** http://spring.io
 ** https://github.com/javaee-samples/javaee7-samples
-* Veille techno
-*** blogs : xebia,ippon,octo...
-*** dzone.com /developpez
-***	Devoxx(FR) sur
-***	http://lescastcodeurs.com/
-*** twitter
 
+== Veille techno
+
+* blogs : xebia,ippon,octo...
+* dzone.com /developpez
+* Devoxx(FR) sur youtube
+* http://lescastcodeurs.com/
+* twitter
+* ...
 
 == Historique : persistance Java
 

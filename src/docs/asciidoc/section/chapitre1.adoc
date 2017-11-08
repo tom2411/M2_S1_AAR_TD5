@@ -1,3 +1,4 @@
+
 == ORM : gestion de la persitance des données
 
 === ORM ?
@@ -255,6 +256,10 @@ Utilisation de frameworks pour simplifier la tâche de mapping
 
 === Exemple de Spring JDBC Template
 
+[source,java]
+----
+include::{sourcedir}/jdbctemplate/Application.java[tags=createTable,indent=0]
+----
 
 
 // partie JPA
