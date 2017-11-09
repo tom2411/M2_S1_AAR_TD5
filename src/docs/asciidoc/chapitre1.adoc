@@ -1,5 +1,5 @@
-
 == ORM : gestion de la persitance des données
+
 
 === ORM ?
 
@@ -254,13 +254,26 @@ Utilisation de frameworks pour simplifier la tâche de mapping
 * JOOQ
 * QueryDSL
 
-=== Exemple de Spring JDBC Template
+=== Spring JDBC Template (1)
 
 [source,java]
 ----
 include::{sourcedir}/jdbctemplate/Application.java[tags=createTable,indent=0]
 ----
 
+=== Spring JDBC Template (2)
+
+[source,java]
+----
+include::{sourcedir}/jdbctemplate/Application.java[tags=insertTable,indent=0]
+----
+
+=== Spring JDBC Template (3)
+
+[source,java]
+----
+include::{sourcedir}/jdbctemplate/Application.java[tags=selectTable,indent=0]
+----
 
 // partie JPA
 

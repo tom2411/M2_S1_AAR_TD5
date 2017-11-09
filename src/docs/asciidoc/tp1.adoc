@@ -1,0 +1,513 @@
+= AAR TP1 : Persistance sans conteneur
+Frédéric Moal <frederic.moal@univ-orleans.fr>
+v1.0, 2017-10-26: une première version
+:example-caption!:
+ifndef::imagesdir[:imagesdir: images]
+ifndef::sourcedir[:sourcedir: ../../main/java]
+// reveal options ; cf https://github.com/asciidoctor/ asciidoctor-reveal.js/
+:revealjs_theme: white
+:revealjs_transition: linear
+
+== Gestion de la persistance hors conteneur
+
+Le but de ce premier TP est de tester et comprendre la persistance des classes Java
+dans un environnement sans conteneur, et de maitriser les outils JPA proposés par IntelliJ/Eclipse JEE. Nous allons tester l'implémentation de référence de JPA 2.1, EclipseLink, puis Hibernate.
+
+* Pré-requis
+
+Avoir un vrai SGBD d'installé, on utilisera MySQL(MySQL 5.X, X>0)
+
+* sous linux apt-get install mysql-server
+* ou sous windows/... un WAMP (http://www.wampserver.com/) ou directement MySQL (http://www.mysql.org).
+* Ou avec docker :
+`docker run --name mysql -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 -d mysql`
+
+Pour lancer un client Mysql avec docker :
+`docker run -it --link mysql:mysql --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD"'`
+
+
+== Exercice 1 : Architecture minimale
+
+Pour commencer, on veut mettre en place l'architecture suivante :
+
+[.thumb]
+image::tp1-archi1.png[scaledwidth=100%]
+
+
+=== création du projet et configuration de l'environnement initial de persistance JPA
+
+. Créer un nouveau projet de type Maven, sans archetype
+
+. Dans le pom.xml, ajoutez dans les dépendances ( http://search.maven.org ) :
+* le driver JDBC MySQL pour accéder à la base (mysql:mysql-connector-java:?)
+* le gestionnaire de persistence JPA, ici eclipseLink : org.eclipse.persistence:eclipselink:?
+* définissez les sources du projet en java 8 :
+[source,xml]
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+
+. Créez les classes [persistantes] Client, Compte, Livret dans un package modele :
+[source,java]
+public class Client {
+    private long id;
+    private String nom;
+    private String prenom;
+    private String adresse;
+    private Collection<Compte> comptes;
+}
+public class Compte {
+    private long id;
+    private Client titulaire;
+    private double solde;
+    private Date dateOuverture;
+}
+public class Livret extends Compte {
+    private double tauxInteret;
+}
+
+. Générez à l'aide des assistants les getters/setters/constructeurs par défaut/full.
+
+. Ajoutez les annotations minimales aux classes pour les rendre persistantes (Id, relations, types temporels…). Utilisez pour cela la refcardZ rc022-JPA_Online.pdf
+
+. Ajoutez dans resources : META-INF/persistence.xml
+[source,xml]
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
+http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd"
+             version="2.1">
+    <persistence-unit name="default" transaction-type="RESOURCE_LOCAL">
+        <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+            <property name="javax.persistence.schema-generation.database.action" value="create"/>
+            <property name="javax.persistence.schema-generation.create-source" value="metadata"/>
+            <property name="javax.persistence.schema-generation.drop-source" value="metadata"/>
+            <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/masuperdatabase"/>
+            <property name="javax.persistence.jdbc.user" value="root"/>
+            <property name="javax.persistence.jdbc.password" value="root"/>
+        </properties>
+    </persistence-unit>
+</persistence>
+
+
+. Ajoutez un programme principal Main, qui créé un persitence manager et persiste 2 clients, avec un compte pour le premier, un compte et un livret pour le deuxième.
+Vérifiez dans la BD les structures de la BD et les tuples ajoutés.
+
+. Modifiez la stratégie d'héritage, en vérifiant à chaque fois la structure de la BD.
+
+. Ecrire un nouveau Main qui affiche l'ensemble des comptes, puis l'ensemble des livrets
+
+. Dans un nouveau Main, modifiez une instance persistante et vérifiez qu'elle est bien modifiée dans la BD.
+
+. Supprimez une instance persistante.
+
+. Recherchez un Compte par son Id : on passe en paramètre du programme une référence (chaine) et il affiche le Compte et le Client s'il le trouve
+
+
+== Exercice 2 : JPA/Hibernate avec DAO
+
+On va cette fois ajouter une couche de DAO, en changeant l'implémentation JPA par Hibernate.
+
+. Créez un nouveau projet Maven dans lequel vous ajoutez une dépendance aux librairies Hibernate (org.hibernate:hibernate-entitymanager:4.3.7.Final) et MySQL pour le Driver JDBC.
+
+. Recopiez le code (classes du modele) du projet précédent dans ce nouveau projet et modifiez le provider de persistance par Hibernate :
+[source,xml]
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+        version="2.0">
+    <persistence-unit name="banque1" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        <class>modele.Client</class>
+        <class>modele.Compte</class>
+        <class>modele.Livret</class>
+        <properties>
+            <property name="javax.persistence.schema-generation.scripts.action" value="none"/>
+            <property name="javax.persistence.schema-generation.create-database-schemas" value="false"/>
+            <!-- <property name="hibernate.hbm2ddl.auto" value="create" /> -->
+            <!-- Dialecte -->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect" />
+            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/banque"/>
+            <property name="javax.persistence.jdbc.user" value="root"/>
+            <property name="javax.persistence.jdbc.password" value=""/>
+            <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
+            <!--logs SQL -->
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+            <property name="use_sql_comments" value="true"/>
+        </properties>
+    </persistence-unit>
+</persistence>
+
+. Ajoutez une couche DAO, séparée en 3 interfaces : ClientDao, CompteDao, LivretDao ; chaque Dao offrira au minimum les méthodes suivantes :
+public void create(T entity);
+public void edit(T entity);
+public void remove(T entity);
+public T find(Object id);
+public List<T> findAll();
+public int count();
+
+. Testez cette architecture avec ce nouveau provider, en écrivant un Main qui fait appel à la DAO que vous devrez instancier à la main.
+
+== Exercice 3 : couche Métier
+
+Pour terminer, on va réaliser une architecture type en ajoutant une façade à la couche Métier, ou couche de Service :
+
+. Créez un nouveau projet Maven ;
+. Recopiez les couches modele et dao du projet précédent, ainsi que les dépendances associées (pom.xml) ;
+. Ajoutez un nouveau package facade, ainsi qu'une couche de service permettant de faire un virement entre 2 comptes ;
+. Testez votre implémentation à l'aide d'un Main, qui instancie les couches de service et de dao, puis interagit avec la couche de service.
+
+Voilà un exemple de Main :
+[source,java]
+----
+package main;
+
+public class InitDBjse {
+    // couche service
+    private static Service service;
+
+    public static void main(String[] args) throws ParseException {
+        // couche service
+        service = ???
+        // on vide la base
+        clean();
+        // on la remplit
+        fill();
+        // on vérifie visuellement
+        dumpClients();
+        dumpComptes();
+        dumpLivrets();
+        dumpClientsComptes();
+    }
+    // affichage contenu table Client
+    private static void dumpClients() {
+        System.out.format("[Clients]%n");
+        for (Client c : service.getAllClients()) {
+            System.out.println(c);
+        }
+    }
+    // affichage contenu table Livret
+    private static void dumpLivrets() {
+        System.out.format("[Livrets]%n");
+        for (Livret a : service.getAllLivrets()) {
+            System.out.println(a);
+        }
+    }
+    // affichage contenu table Activite
+    private static void dumpComptes() {
+        System.out.format("[Compte]%n");
+        for (Compte a : service.getAllComptes()) {
+            System.out.println(a);
+        }
+    }
+    // affichage Client->Comptes
+    private static void dumpClientsComptes() {
+        System.out.println("[Clients/comptes]");
+        for (Client p : service.getAllClients()) {
+            for (Compte a : service.getComptesOfClient(p.getId())) {
+                System.out.format("[%s,%s]%n", p.getNom(), a.getId());
+            }
+        }
+    }
+    // remplissage tables
+    public static void fill() throws ParseException {
+        // création Clients
+        Client c1 = new Client(1003, "Martin", "Paul", "Orléans");
+        Client c2 = new Client(1015, "Dupont", "Sylvie", "Olivet");
+        Client c3 = new Client(1109, "Dupond", "Henri", "La ferté");
+
+        // ajout des Comptes/Livrets
+        c1.addCompte(new Compte(198,c1, new SimpleDateFormat("dd/MM/yy").parse("31/01/2010"),2300.0));
+        c2.addCompte(new Compte(203,c2, new SimpleDateFormat("dd/MM/yy").parse("05/07/2001"),5440.0));
+        c2.addCompte(new Livret(205,c2, new SimpleDateFormat("dd/MM/yy").parse("05/07/2011"),655.0,0.05));
+        c3.addCompte(new Compte(243,c3, new SimpleDateFormat("dd/MM/yy").parse("25/12/2013"),450.0));
+        // persistance des Clients avec leurs comptes/livrets
+        service.saveClients(new Client[]{c1,c2,c3});
+    }
+    // suppression de tous les éléments
+    public static void clean() {
+        // on supprime ttes les Clients et donc toutes les Comptes
+        for (Client Client : service.getAllClients()) {
+            service.deleteClient(Client.getId());
+        }
+    }
+}
+----
+
+== Exercice 4 : Reverse BD -> Java
+
+Vous allez faire l'opération inverse à la précédente :
+partir d'une base de données existante pour y accéder en Java.
+
+Pour cela, récupérez le script SQL de création de la BD ci-dessous,
+puis lancez le dans une nouvelle database (eg create database albums)
+depuis Eclipse/IntelliJ.
+
+[source,sql]
+----
+-- MySQL dump 10.13  Distrib 5.5.16, for Win32 (x86)
+--
+-- Host: localhost    Database: albums
+-- ------------------------------------------------------
+-- Server version	5.5.16-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `album_items`
+--
+
+DROP TABLE IF EXISTS `album_items`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `album_items` (
+  `album_item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `description` varchar(255) DEFAULT NULL,
+  `file` varchar(255) DEFAULT NULL,
+  `item_type` varchar(255) DEFAULT NULL,
+  `latitude` float DEFAULT NULL,
+  `longitude` float DEFAULT NULL,
+  `selected` tinyint(1) NOT NULL,
+  `shootdate` datetime DEFAULT NULL,
+  `camera_owner` int(11) DEFAULT NULL,
+  `photo_album_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`album_item_id`),
+  KEY `FK_6l6uyjbrtxeebwn0ug5c2l91v` (`camera_owner`),
+  KEY `FK_629ak5y3e2tn1cwa43prpwm1m` (`photo_album_id`),
+  CONSTRAINT `FK_629ak5y3e2tn1cwa43prpwm1m` FOREIGN KEY (`photo_album_id`) REFERENCES `photo_albums` (`photo_album_id`),
+  CONSTRAINT `FK_6l6uyjbrtxeebwn0ug5c2l91v` FOREIGN KEY (`camera_owner`) REFERENCES `users` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `album_items`
+--
+
+LOCK TABLES `album_items` WRITE;
+/*!40000 ALTER TABLE `album_items` DISABLE KEYS */;
+/*!40000 ALTER TABLE `album_items` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `groups`
+--
+
+DROP TABLE IF EXISTS `groups`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `groups` (
+  `group_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`group_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `groups`
+--
+
+LOCK TABLES `groups` WRITE;
+/*!40000 ALTER TABLE `groups` DISABLE KEYS */;
+INSERT INTO `groups` VALUES (1,'Bro'),(2,'Friends'),(3,'Family');
+/*!40000 ALTER TABLE `groups` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `photo_album_group`
+--
+
+DROP TABLE IF EXISTS `photo_album_group`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `photo_album_group` (
+  `photo_album_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  KEY `FK_7riq3nhm1wcnlbehnjkabjwnm` (`group_id`),
+  KEY `FK_bwuufkdoxqeniv7jjjb3olet6` (`photo_album_id`),
+  CONSTRAINT `FK_bwuufkdoxqeniv7jjjb3olet6` FOREIGN KEY (`photo_album_id`) REFERENCES `photo_albums` (`photo_album_id`),
+  CONSTRAINT `FK_7riq3nhm1wcnlbehnjkabjwnm` FOREIGN KEY (`group_id`) REFERENCES `groups` (`group_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `photo_album_group`
+--
+
+LOCK TABLES `photo_album_group` WRITE;
+/*!40000 ALTER TABLE `photo_album_group` DISABLE KEYS */;
+INSERT INTO `photo_album_group` VALUES (1,1),(2,2),(2,3),(3,1),(4,3);
+/*!40000 ALTER TABLE `photo_album_group` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `photo_album_user_allowed`
+--
+
+DROP TABLE IF EXISTS `photo_album_user_allowed`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `photo_album_user_allowed` (
+  `photo_album_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  KEY `FK_flsenxchg3o9kse6b4c4ymfqs` (`user_id`),
+  KEY `FK_5fyu267luo138eq6nn1mq4yrs` (`photo_album_id`),
+  CONSTRAINT `FK_5fyu267luo138eq6nn1mq4yrs` FOREIGN KEY (`photo_album_id`) REFERENCES `photo_albums` (`photo_album_id`),
+  CONSTRAINT `FK_flsenxchg3o9kse6b4c4ymfqs` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `photo_album_user_allowed`
+--
+
+LOCK TABLES `photo_album_user_allowed` WRITE;
+/*!40000 ALTER TABLE `photo_album_user_allowed` DISABLE KEYS */;
+INSERT INTO `photo_album_user_allowed` VALUES (1,3);
+/*!40000 ALTER TABLE `photo_album_user_allowed` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `photo_album_user_denied`
+--
+
+DROP TABLE IF EXISTS `photo_album_user_denied`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `photo_album_user_denied` (
+  `photo_album_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  KEY `FK_n4ivx1i6a3yn3n7dg2oenlci9` (`user_id`),
+  KEY `FK_9lrdcta4wq0w09wwvda8q6rcw` (`photo_album_id`),
+  CONSTRAINT `FK_9lrdcta4wq0w09wwvda8q6rcw` FOREIGN KEY (`photo_album_id`) REFERENCES `photo_albums` (`photo_album_id`),
+  CONSTRAINT `FK_n4ivx1i6a3yn3n7dg2oenlci9` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `photo_album_user_denied`
+--
+
+LOCK TABLES `photo_album_user_denied` WRITE;
+/*!40000 ALTER TABLE `photo_album_user_denied` DISABLE KEYS */;
+INSERT INTO `photo_album_user_denied` VALUES (2,2);
+/*!40000 ALTER TABLE `photo_album_user_denied` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `photo_albums`
+--
+
+DROP TABLE IF EXISTS `photo_albums`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `photo_albums` (
+  `photo_album_id` int(11) NOT NULL AUTO_INCREMENT,
+  `description` varchar(255) DEFAULT NULL,
+  `directory` varchar(255) DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `start_date` date DEFAULT NULL,
+  `thumbfile` varchar(255) DEFAULT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`photo_album_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `photo_albums`
+--
+
+LOCK TABLES `photo_albums` WRITE;
+/*!40000 ALTER TABLE `photo_albums` DISABLE KEYS */;
+INSERT INTO `photo_albums` VALUES (1,'Jack Johnson & friends show at Bercy','2008_07_09 - Jack Johnson','2008-07-10','2008-07-09','1/img_3066.jpg','Jack Johnson Show at Bercy'),(2,'Holidays with Friends','2008_07_18 - Lan La Rochelle',NULL,'2008-07-18','1/img_3138.jpg','Holidays'),(3,'Trip to paris','2008_07_11 - Cremaillere Paris','2008-07-14','2008-07-11','1/img_3092.jpg','Paris'),(4,'Christmas 08','2008_12_25 - Noel 2008',NULL,'2008-12-25','1/img_0476.jpg','Christmas');
+/*!40000 ALTER TABLE `photo_albums` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `user_group`
+--
+
+DROP TABLE IF EXISTS `user_group`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_group` (
+  `user_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  PRIMARY KEY (`user_id`,`group_id`),
+  KEY `FK_789v3ejjs9uj5vu1ufexj2tbv` (`group_id`),
+  KEY `FK_mps81qti05d9he0y66y5jt845` (`user_id`),
+  CONSTRAINT `FK_mps81qti05d9he0y66y5jt845` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
+  CONSTRAINT `FK_789v3ejjs9uj5vu1ufexj2tbv` FOREIGN KEY (`group_id`) REFERENCES `groups` (`group_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user_group`
+--
+
+LOCK TABLES `user_group` WRITE;
+/*!40000 ALTER TABLE `user_group` DISABLE KEYS */;
+INSERT INTO `user_group` VALUES (1,1),(2,1),(1,2),(2,2),(1,3),(3,3);
+/*!40000 ALTER TABLE `user_group` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `users`
+--
+
+DROP TABLE IF EXISTS `users`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `birthday` datetime DEFAULT NULL,
+  `firstname` varchar(255) DEFAULT NULL,
+  `login` varchar(255) DEFAULT NULL,
+  `mail` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `nickname` varchar(255) DEFAULT NULL,
+  `pass` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `users`
+--
+
+LOCK TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+INSERT INTO `users` VALUES (1,'1984-12-22 00:00:00','Alexandre','alex','alex@foo.org','FOO','Alex','098f6bcd4621d373cade4e832627b4f6'),(2,'1984-06-14 00:00:00','Bob','bob','bob@foo.org','BAR','Bob','098f6bcd4621d373cade4e832627b4f6'),(3,'1984-04-21 00:00:00','Chloe','chloe','chloe@foo.org','FOO',NULL,'098f6bcd4621d373cade4e832627b4f6');
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2013-11-17 16:39:15
+----
+
+Créez un nouveau projet JPA « vide », avec un profil EclipseLink 2.5 et utilisez la base de données albums (obtenue en lançant le script albums.sql) pour générer automatiquement les classes Java. Pour cela, utilisez l'assistant du menu JPA du projet.
+
