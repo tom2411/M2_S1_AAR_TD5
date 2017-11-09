@@ -8,7 +8,6 @@ ifndef::sourcedir[:sourcedir: ../../main/java]
 :revealjs_theme: white
 :revealjs_transition: linear
 
-[.text-left]
 
 == Le cours
 
@@ -128,8 +127,8 @@ image::archi-classique.png[scaledwidth=75%]
 
 // Les chapitres
 
-include::section/chapitre1.adoc[]
+include::chapitre1.adoc[]
 
-//include::section/chapitre2.adoc[]
+//include::chapitre2.adoc[]
 
 

@@ -27,7 +27,7 @@ public class Application implements CommandLineRunner {
     @Override
     public void run(String... strings) throws Exception {
 
-        // tags::createTable[]
+        // tag::createTable[]
         log.info("Creating tables");
 
         jdbcTemplate.execute("DROP TABLE customers IF EXISTS");
@@ -35,6 +35,7 @@ public class Application implements CommandLineRunner {
                 "id SERIAL, first_name VARCHAR(255), last_name VARCHAR(255))");
         // end::createTable[]
 
+        // tag::insertTable[]
         // Split up the array of whole names into an array of first/last names
         List<Object[]> splitUpNames = Arrays.asList("John Woo", "Jeff Dean", "Josh Bloch", "Josh Long").stream()
                 .map(name -> name.split(" "))
@@ -45,11 +46,14 @@ public class Application implements CommandLineRunner {
 
         // Uses JdbcTemplate's batchUpdate operation to bulk load data
         jdbcTemplate.batchUpdate("INSERT INTO customers(first_name, last_name) VALUES (?,?)", splitUpNames);
+        // end::insertTable[]
 
         log.info("Querying for customer records where first_name = 'Josh':");
+        // tag::selectTable[]
         jdbcTemplate.query(
                 "SELECT id, first_name, last_name FROM customers WHERE first_name = ?", new Object[] { "Josh" },
                 (rs, rowNum) -> new Customer(rs.getLong("id"), rs.getString("first_name"), rs.getString("last_name"))
         ).forEach(customer -> log.info(customer.toString()));
+        // end::selectTable[]
     }
 }
