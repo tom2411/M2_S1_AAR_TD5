@@ -1,14 +1,13 @@
+== ORM : gestion de la persitance des données
 ifndef::imagesdir[:imagesdir: images]
 ifndef::sourcedir[:sourcedir: ../../main/java]
-
-== ORM : gestion de la persitance des données
 
 
 === ORM ?
 
 Il y a des différences fondamentales entre un tuple dans une table et un objet d’une classe
 
-* Pas d'héritage ou de polymorphisme en base de données
+* Pas d'héritage ou de polsymorphisme en base de données
 * La gestion des associations est différente (one-to-many et many-to-many)
 * De nombreux types de données sont différents (par exemple il y a de nombreuses façons de stocker une String en base de données)
 * Les contraintes de validation ne sont pas gérées de la même manière
@@ -228,8 +227,7 @@ XML, décrivent les classes des objets persistants
 
 https://wiki.apache.org/jdo/FrontPage
 
-https://cloud.google.com/appengine/docs/java/datastore/jd
-o/dataclasses
+https://cloud.google.com/appengine/docs/java/datastore/jdo/dataclasses
 
 
 // partie SQL
@@ -242,6 +240,7 @@ o/dataclasses
 * meilleur contrôle du mapping
 * une _certaine_ indépendance du schéma de la BD / Structure des objets
 
+ifdef::backend-revealjs[=== !]
 Mais
 
 * connaissance obligatoire de la structure de la BD
@@ -286,7 +285,9 @@ include::{sourcedir}/jdbctemplate/Application.java[tags=selectTable,indent=0]
 * Utilisation dans ou hors container EJB (3)
 * Mêmes concepts que JDO/Hibernate
 * Norme « officielle »
-* C’est une spécification = Nécessite une implémentation
+
+ifdef::backend-revealjs[=== !]
+* C’est une spécification => Nécessite une implémentation
 ** Hibernate
 ** OpenJPA
 ** EclipseLink : implémentation de référence pour JPA
@@ -320,7 +321,7 @@ Stream, Java 8 Date Time ! CDI injection in `AttributeConverters`
 
 === JPA : une spécification
 
-Donc Nécessite une implémentation
+Choix d'une implémentation
 
 * Hibernate
 * EclipseLink : implémentation de référence
@@ -458,7 +459,8 @@ Récupération « à la main » dans le code du gestionnaire d’entités :
 
 [source,java]
 ----
-EntityManagerFactory emf = Persistence.createEntityManagerFactory("employes");
+EntityManagerFactory emf =
+    Persistence.createEntityManagerFactory("employes");
 EntityManager em = emf.createEntityManager();
 
 EntityTransaction tx = em.getTransaction();
@@ -480,8 +482,7 @@ Pour JPA c’est différent : l’accès par accesseur oblige à avoir des sette
 
 Par exemple, les setters peuvent permettre à l’utilisateur de ne pas utiliser une méthode ajoutée pour obliger à bien mettre à jour les 2 bouts d’une association bidirectionnelle
 
-[%notitle]
-=== suite
+ifdef::backend-revealjs[=== !]
 
 L’accès par champ permet de distinguer l’accès aux attributs par JPA
 et l’accès aux attributs par l’application (effectué par setters et getters)
@@ -490,6 +491,7 @@ Il est donc conseillé de choisir plutôt l’accès par champ avec JPA
 
 Pour des cas particuliers il est toujours possible d’utiliser @Access(PROPERTY) sur certains attributs ;
 mais attention, un traitement complexe dans un setter peut occasionner un problème s’il dépend de la valeur d’autres attributs (pas nécessairement initialisés à ce moment)
+
 
 === JPA : compléments
 
@@ -509,7 +511,7 @@ Enumerations :
 @Enumerated(EnumType.STRING)
 private TypeEmploye typeEmploye;
 
-=== JPA :
+=== JPA : transitivité ?
 
 Persistance par transitivité : Attention, pas par défaut !
 
@@ -517,7 +519,7 @@ Cohérence à maintenir « manuellement » lors des commits
 
 Choix *explicite* du mode par attribut cascade dans mapping : PERSIST, REMOVE, REFRESH, ALL
 
-=== JPA :
+=== JPA : cascade
 
 [source,java]
 ----
@@ -532,7 +534,7 @@ private Collection<Employe> employes;
 private Collection<Facture> factures;
 ----
 
-=== JPA :
+=== JPA : TAD
 Types déclarés diff implem dans les 1-n !
 [source,java]
 @Entity
@@ -551,10 +553,10 @@ public class Person implements Serializable {
 [source,java]
 @Entity
 public class Customer {
-    @Id
+    @Id
     int id;
-    @Embedded
-    CustomerInfo info;
+    @Embedded
+    CustomerInfo info;
 }
 @Embeddable
 public class CustomerInfo {
@@ -715,7 +717,7 @@ Définir ses propres validators
 @Retention(RUNTIME)
 @Documented
 @Pattern(regexp = "^\\(?([0-9]{3})\\)?([ .-]?)([0-9]{3})\\2([0-9]{4})$", message = "{error.validation.phonenumber}")
-public @interface PhoneNumber {
+public @interface PhoneNumber {
 }
 ----
 

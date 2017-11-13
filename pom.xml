@@ -14,7 +14,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
 
-        <project.slides.directory>${project.build.directory}/generated-slides</project.slides.directory>
         <asciidoctor.maven.plugin.version>1.5.6</asciidoctor.maven.plugin.version>
         <asciidoctorj.version>1.5.6</asciidoctorj.version>
         <jruby.version>1.7.26</jruby.version>
@@ -46,6 +45,7 @@
 
     <build>
         <defaultGoal>process-resources</defaultGoal>
+
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -119,6 +119,10 @@
                     <requires>
                         <require>asciidoctor-diagram</require>
                     </requires>
+                    <attributes>
+                        <project-version>${project.version}</project-version>
+                        <sourcedir>${basedir}/src/main/java</sourcedir>
+                    </attributes>
                 </configuration>
                 <executions>
                     <execution>
@@ -132,6 +136,16 @@
                             <backend>revealjs</backend>
                             <templateDir>${project.build.directory}/asciidoctor-reveal.js-${asciidoctor-revealjs.version}/templates/slim</templateDir>
                             <sourceHighlighter>coderay</sourceHighlighter>
+                            <resources>
+                                <resource>
+                                    <!-- (Mandatory) Directory to copy from. Paths are relative to maven's ${baseDir} -->
+                                    <directory>src/docs/asciidoc</directory>
+                                    <!-- (Optional) NOTE: SVN, GIT and other version control files are excluded by default, there's no need to add them -->
+                                    <excludes>
+                                        <exclude>**/tp*.adoc</exclude>
+                                    </excludes>
+                                </resource>
+                            </resources>
                             <attributes>
                                 <!--
                                     As we are downloading reveal.js in runtime, it sits in a nonstandard folder `reveal.js-${revealjs.version}`

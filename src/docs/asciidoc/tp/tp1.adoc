@@ -1,13 +1,10 @@
 = AAR TP1 : Persistance sans conteneur
 Frédéric Moal <frederic.moal@univ-orleans.fr>
 v1.0, 2017-10-26: une première version
-:example-caption!:
-ifndef::imagesdir[:imagesdir: images]
+ifndef::imagesdir[:imagesdir: ../images]
 ifndef::sourcedir[:sourcedir: ../../main/java]
 ifndef::resourcesdir[:resourcesdir: ../../main/resources]
-// reveal options ; cf https://github.com/asciidoctor/ asciidoctor-reveal.js/
-:revealjs_theme: white
-:revealjs_transition: linear
+
 
 == Gestion de la persistance hors conteneur
 

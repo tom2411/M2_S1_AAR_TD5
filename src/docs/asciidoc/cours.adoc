@@ -7,6 +7,7 @@ ifndef::sourcedir[:sourcedir: ../../main/java]
 // reveal options ; cf https://github.com/asciidoctor/asciidoctor-reveal.js/
 :revealjs_theme: white
 :revealjs_transition: linear
+:revealjs_center: false
 
 
 == Le cours
@@ -57,12 +58,13 @@ Les notes de slides sont visibles dans la fenêtre speaker, mais aussi dans le p
 * twitter
 * ...
 
-== Historique : persistance Java
+== Historique
 
-|===
+[.stretch]
+[options="header", cols="<,<,<", width="100%"]
+|=====================================
 |JDK|JEE|Autre
-
-| JDK 1.0 : java.io, java.util.Properties
+|JDK 1.0 : java.io, java.util.Properties
 
 JDK 1.1 : Sérialisation des objets, JDBC
 
@@ -72,7 +74,7 @@ JSR 243, JDO 2.0, 2006
 
 JSR 222, JAXB 2.0, 2006
 
-| EJB 1.0, 1998, gestion des transactions distribuées
+|EJB 1.0, 1998, gestion des transactions distribuées
 
 JSR 19, EJB 2.0, 2001
 
@@ -82,7 +84,7 @@ JSR 316, JEE 6, 2009 avec EJB 3.1, JPA 2.0, CDI 1.0
 
 JSR 342, JEE 7, 2013 avec EJB 3.2, JPA 2.1, CDI 1.1
 
-| Hibernate, contre EJB2, 2001
+|Hibernate, contre EJB2, 2001
 
 Hibernate 2, 2003 [JBoss]
 
@@ -95,7 +97,8 @@ Hibernate Core 4, 2011
 Hibernate ORM 4.3, 2013, JPA 2.1
 
 Hibernate ORM 5, 2015, Java 8
-|===
+|=====================================
+
 
 
 
