@@ -132,6 +132,6 @@ image::archi-classique.png[scaledwidth=75%]
 
 include::chapitre1.adoc[]
 
-//include::chapitre2.adoc[]
+include::chapitre2.adoc[]
 
 

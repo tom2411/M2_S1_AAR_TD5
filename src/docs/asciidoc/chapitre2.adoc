@@ -1,11 +1,1318 @@
 == Spring
+ifndef::imagesdir[:imagesdir: images]
+ifndef::sourcedir[:sourcedir: ../../main/java]
 
-=== Injection de dépendances
+Containers légers vs containers lourds
+
+=== Problématique
+
+[.thumb]
+image::archi-complete.png[scaledwidth=75%]
+
+- C’est gentil de faire X couches,
+comment on récupère la couche N-1 dans la couche N ? Un bon new ?
+
+- Et mes transactions, c’est qui qui va les faires ?
+
+- Et la gestion des exceptions ?
+
+- Et la gestion de la sécurité, c’est pas moi quand même ?
+
+
+=== Containers
+
+Ces fonctionnalités sont en général fournies par un `container`
+
+2 approches :
+
+* Utiliser une pile complète d'implémentations et utiliser les implémentations fournies
+** Approche JEE
+* Utiliser une pile minimale et ajouter les éléments supplémentaires nécessaires [par dépendances]
+** Approche Spring
 
 
 
-=== Spring MVC
+=== Sources des données
+
+    * Vous devez utiliser une DataSource, qui doit vous fournir un pool de connexions 
+
+    * Cette DataSource peut être configurée via JNDI 
+
+        ** Cas « normal » en Java EE 
+
+        ** Configuration répandue en production, car les paramètres de connexion à la base sont gérés par les équipes d'exploitation 
+
+    * Elle peut également être gérée dans l'application 
+
+        ** Cas fréquent avec Spring 
+
+        ** Permet à l'application d'être une unité simple à déployer 
+
+        ** Permet de gérer des cas plus complexes qu'avec JNDI 
+
+
+=== pour JPA ?
+
+    * Dans les 2 cas vous pourrez utiliser JPA de manière identique 
+
+    * Avec Java EE 
+
+        ** L'implémentation JPA, le cache, etc... sont fournis par le serveur d'applications 
+
+        ** Vous aurez nettement moins de configuration, support global par votre éditeur
+
+    * Avec Spring 
+
+        ** Vous pourrez tout modifier et tout paramétrer 
+
+        ** Vous serez portable d'un serveur à l'autre 
+
+        ** Vous aurez accès à des APIs non standard, comme Spring Data
+
+        ** Mais vous aurez plus de travail à tout configurer, et vous n'aurez pas le support de votre éditeur 
+
+ 
+
+=== EJB (3.X)
+ 
+[%step]
+Les EJB 3 en 5 secondes …
+
+Cf Matthieu Exbrayat
+ 
+
+=== Spring
+ 
+
+Une brève histoire de Spring
+
+    * Octobre 2002 Rod Johnson publie son livre «Expert One-on-One J2EE Design and Development», dans lequel il propose du code, qui va devenir plus tard le framework Spring 
+
+    * Mars 2004 Spring 1.0 sort sous licence Apache 2.0 
+
+    * 2005 Spring devient populaire, en particulier en réaction par rapport aux EJBs 2.x 
+
+    * 2006 Spring gagne un «Jolt Productivity Award», ce qui assoit sa notoriété 
+
+    * 2007 Sortie de Spring 2.5, avec support des annotations 
+
+    * 2009 Achat de SpringSource par VMWare (420 M$) 
+
+    * 2013 Création de Pivotal, une joint venture entre VMWare et EMC Corporation 
+
+ 
+
+=== Qu’est ce que Spring ?
+
+    * Un framework Java 
+
+    * Un conteneur IoC 
+
+    * Un ensemble de projets 
+
+    * Une communauté et une société 
+
+    * Open Source : licence Apache 2.0 
+
+ 
+
+=== Qu’est-ce que Spring ?
+
+    * Spring n’est pas un serveur d’applications 
+
+        ** Il peut fonctionner sans serveur d’applications (application «stand alone», par exemple un batch) 
+
+        ** Il peut fonctionner à l’intérieur d’un serveur d’applications 
+
+    * Il peut alors utiliser les fonctionnalités du serveur, pour en simplifier ou en abstraire le fonctionnement 
+
+    * Il peut également remplacer certaines fonctionnalités du serveur, si on juge que Spring propose une meilleure alternative 
+
+    * Généralement Spring est utilisé conjointement à un serveur d’applications léger : Tomcat ou Jetty 
+
+        ** Peu d’intérêt à utiliser Spring dans un serveur Java EE «complet» 
+
+        ** Mais Spring fonctionne également parfaitement avec Weblogic, WebSphere, Glassfish, etc 
+
+ 
+
+=== Spring : Architecture complète et modulaire
+
+[.thumb]
+image::spring-stack.png[scaledwidth=75%]
+
+=== Spring : organisation
+
+L’organisation de Spring est modulaire. Pourvu d’un module de base « Spring core », six modules
+d’inégales importances apparaissent (en gras les modules majeurs):
+
+* Spring Core : module de gestion des dépendances entre beans (implémente L’injection de
+dépendance)
+
+* Spring AOP : réservé à des développements très spécifiques
+
+* Spring ORM : Classes utilitaires permettant une intégration intéressante des différentes
+framework de mapping O/R, notamment avec Hibernate
+
+* Spring DAO : Classes utilitaires facilitant à l’extrême le développement d’une couche
+d’accès aux données en jdbc pur.
+
+* Spring Context : permet de masquer une grande partie de la technologie nécessaire pour se
+connecter à des ejb, à JNDI, à JMS,… Mais aussi l’internationalisation de nos applications
+
+* Spring Web : comment utiliser Spring depuis une application web
+
+* Spring MVC : Implémenter une application web en respectant le design pattern MVC
+(concurrent de struts)
 
 
 
-=== Spring security
+=== Spring : un principe fondateur
+
+    * IoC == Inversion of Control 
+
+        ** Le «principe d’Hollywood» : Ne nous appelez pas, nous vous rappellerons 
+
+        ** Permet d’avoir des composants «faiblement couplés» 
+
+    * Améliore la qualité du code 
+
+    * Facilite les tests !!
+
+    * La principale forme d’IoC : «l’injection de dépendances» (ou DI) 
+
+ 
+
+=== Injection de Dépendances - DI
+
+    * A la base, il s’agit simplement d’injecter un objet dans un autre 
+[source,java]
+public class TodosServiceImpl {
+    private UserService userService;
+}
+ 
+Comment initialiser `userService` ?
+
+
+=== La mauvaise méthode
+
+    * La méthode interdite : le NEW, c’est mal 
+[source,java]
+public class TodosServiceImpl {
+    private MonSuperUserService userService =
+        new MonSuperUserService(plein de params);
+}
+ 
+
+
+=== Réponse classique : exemple de fabrique
+
+[source,java]
+----
+public class ServiceImpl {
+        private BanqueDao dao; ;
+
+        public ServiceImpl(){
+                BanqueDao dao = BanqueFactory.getInstance();
+
+...
+}
+----
+
+* Réponse Spring : injection de dépendance à l’exécution
+
+* [Réponse JEE : injection à la compilation @Inject]
+
+       
+ 
+
+=== Principe de l’IOC
+
+    * Un objet de type A dépend d’un objet type B 
+
+        ** Exemple : A possède un attribut de type B 
+
+    * Pour construire un A j’ai besoin d’un B 
+
+=== IOC : casser cette dépendance ?
+
+    * Une interface I : le type A référence I, B implémente I  
+
+    * Comment instancier avec un B la référence I dans A ? 
+
+        ** En construisant A( I ) 
+
+        ** En appelant un setter après la construction de A 
+
+ 
+
+=== 1ère méthode : go to the setter
+
+    * 1ère méthode, «classique» : l’injection par setter 
+
+        ** Utilise la convention Java Bean 
+[source,java]
+----
+public class TodosServiceImpl {
+
+        private UserService userService;
+
+        public void setUserService(UserService userService) {
+                this.userService = userService;
+        }
+}
+----
+
+=== 2ème méthode : utiliser le constructeur
+
+    * méthode relativement populaire : utiliser le constructeur de l’objet 
+
+[source,java]
+----
+public class TodosServiceImpl {
+
+        private UserService userService;
+
+        public TodosServiceImpl(UserService userService) {
+                this.userService = userService;
+        }
+}
+----
+
+=== 3ème méthode : injecte dans le champ
+
+    * 3ème méthode : Spring injecte directement dans le champ 
+
+        ** Méthode «magique» : en fait les champs «private» en Java peuvent être modifiés (si vous venez d’avoir un cours sur Java, on vous a menti) 
+
+        ** De plus en plus populaire car la méthode la plus simple 
+
+[source,java]
+----
+public class TodosServiceImpl {
+
+        private UserService userService;
+
+}
+----
+
+=== Les 3 méthodes ?
+
+    * Injection par setter 
+
+        ** Respecte la convention JavaBeans (sans grand intérêt) 
+
+        ** Héritage automatique 
+
+        ** Plus clair que par constructeur 
+
+        ** Permet d’avoir des dépendances optionnelles 
+
+ifdef::backend-revealjs[=== !]
+    * Injection par constructeur
+
+        ** Permet d’avoir des objets immutables 
+
+        ** Oblige à avoir toutes les dépendances correctement définies 
+
+        ** Plus concise que par setter 
+
+ifdef::backend-revealjs[=== !]
+    * Injection par champ
+
+        ** Mêmes qualités que par constructeur 
+
+        ** Encore plus concise 
+
+        ** Mais gênant pour les tests unitaires 
+
+ 
+
+=== Conseils
+
+    * Vous pouvez mélanger les 3 types d’injection 
+
+        ** Utilisez le plus simple en fonction de votre existant 
+
+    * L’injection par champ est la plus efficace pour le développement 
+
+        ** Utilisez l’injection par setter pour les dépendances optionnelles 
+
+    * Le plus important est d’être homogène 
+
+        ** Si vous injectez votre data source de 3 manières différentes, personne ne va rien y comprendre ! 
+
+        ** Il est important de mettre en place des règles à ce sujet dès le début du projet 
+
+ 
+
+=== ApplicationContext
+
+    * Un Application Context (une des implémentations de l’interface org.springframework.context.ApplicationContext) représente le conteneur Spring : il est chargé de démarrer les beans, de les injecter, de les gérer, de les détruire 
+
+    * Il en existe de plusieurs sortes : WebApplicationContext pour les applications Web par exemple 
+
+    * Le rôle de cette classe est de prendre vos objets et votre configuration, et de faire fonctionner l’ensemble 
+
+ 
+
+=== Problèmes à résoudre
+
+    * Problèmes Application exemple en TP : 
+
+        ** « connections » entre EntityManager/DAO/Façade : injection de l’entityManager dans la DAO, puis de la DAO dans la façade 
+
+        ** Gestion des transactions !!! 
+
+        ** Gestion des exceptions 
+
+        ** Gestion de la sécurité 
+
+ 
+
+=== Spring : injection de dépendances
+
+    * Injection du DAO dans la couche Service : 
+[source,java]
+----
+public class ServiceBanque implements Service {
+        // lien vers la couche [dao]
+        private BanqueDao banque; // pas d’init !!!
+
+        public void setBanque(BanqueDao banque) {
+                this.banque = banque;
+        }
+----
+    * Dans spring-config : 
+[source,xml]
+<bean id="banqueDao" class="dao.BanqueDaoSpring" />
+<bean id="service" class="service.ServiceBanque">
+    <property name="banque" ref="banqueDao" />
+</bean>
+
+ 
+
+=== Spring : configuration XML
+
+    * Utilise les «namespaces» XML 
+
+        ** Spring fournit une dizaine de namespaces spécialisés : beans, transactions, sécurité, Programmation Orientée Aspect, etc... 
+
+        ** L’import de ces namespaces permet de considérablement simplifier cette configuration 
+
+            *** Propose l’auto-complétion et fournit la documentation
+
+            *** Fonctionne avec tout éditeur XML
+
+            *** Crée automatiquement des ensembles de Beans Spring
+
+    * Un Bean a un ID (unique) et une classe (son implémentation) 
+
+    * Les Beans sont injectés 
+
+        ** Par Setter avec <property name="" ref=""/> 
+
+        ** Par constructeur avec <constructor-arg ref=""/> 
+
+ 
+
+=== Spring : configuration XML
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation= "http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans-3.1.xsd" >
+
+<!-- injection par setter -->
+<bean id="todoService" class="example.TodoServiceImpl" >
+        <property name="userService" ref="userService" />
+</bean>
+
+<!-- injection par constructeur -->
+<bean id="userService" class="example.UserServiceImpl" >
+        <constructor-arg ref="userRepository" />
+</bean>
+</beans>
+----
+
+=== Spring : injection de dépendances
+
+    * Possibilité d’injecter les facades (en mock) dans le business delegate 
+
+[source,xml]
+----
+<bean id="myProductServices" class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
+    <property name="jndiName">
+        <value>myProductServices</value>
+    </property>
+
+    <property name="businessInterface">
+        <value>IProductServices</value>
+    </property>
+</bean>
+
+<bean id="myController" class="myController">
+    <property name="myProductServices">
+        <ref bean="myProductServices"/>
+    </property>
+</bean>
+----
+ 
+
+=== Spring : par annotations
+[source,java]
+----
+@Component
+public class TodosServiceImpl implements TodosService {
+
+    @Inject
+    private UserService userService;
+
+    public Collection<Todo> findAssignedTodos () {
+         User user = userService. getCurrentUser ();
+         ...
+         return assignedTodos;
+    }
+}
+----
+
+=== Spring : par annotations
+
+    * Il faut préciser dans le fichier XML que l’on veut utiliser les annotations 
+[source,xml]
+<beans xmlns="...">
+<context:component-scan base-package= "example.test" />
+</beans>
+
+    * Les Beans annotés @Component sont automatiquement créés 
+
+    * Les Setters, constructeurs et champs annotés avec @Inject sont automatiquement injectés 
+
+ 
+
+=== Spring : recherche des deps
+
+    * Le plus évident : par nom 
+
+        ** Pour injecter un Bean nommé «userService», Spring recherche le Bean qui a cet ID (ref) 
+
+        ** C’était l’exemple de configuration XML 
+
+ifdef::backend-revealjs[=== !]
+    * Le plus concis : par type
+
+        ** On ne nomme pas le Bean à injecter : Spring recherche alors son Type 
+
+        ** Comprendre type au sens Java : Spring recherche alors quel Bean est de ce type là (même classe, ou bien implémentant cette interface) 
+
+        ** Si Spring en trouve un, il l’injecte, et tout se passe bien 
+
+            *** S’il n’en trouve pas on a alors une Exception, et Spring ne peut pas se lancer
+
+            *** S’il en trouve plusieurs, on a également une Exception
+
+        ** C’était l’exemple de configuration par annotations 
+
+ 
+
+=== Spring : 3 modes de configuration
+
+    * XML : méthode «classique», très souple et très puissante 
+
+        ** Essentielle à connaître 
+
+        ** Convient très bien à la configuration dite «d’infrastructure» 
+
+    * Annotations : depuis Spring 2.5 
+
+        ** Plus « rapide » à utiliser 
+
+        ** Plus simple : ne convient qu’à de la configuration «métier» 
+
+ifdef::backend-revealjs[=== !]
+    * Java : depuis Spring 3.0
+
+        ** Permet de coder en Java quelque chose de similaire à la configuration XML 
+
+        ** Plus puissant (c’est du code, on peut faire ce qu’on veut) 
+
+        ** Moins simple à modifier, en particulier pour de la configuration «d’ infrastructure» 
+
+        ** Moins répandu 
+
+ 
+
+=== Spring : nommage
+
+    * Tout Bean est référencé dans le conteneur Spring avec un nom unique 
+
+        ** Si deux Beans ont le même nom, vous aurez une Exception au démarrage 
+
+    * Ce nom est libre, mais par convention on utilise généralement le nom de la classe (ou de l’interface implémentée), en CamelCase, en commençant par une minuscule 
+
+        ** «dataSource», «monServiceMetier», «entityManager» 
+
+        ** L’homogénéité du nommage dans l’application est important 
+
+        ** Bien nommer les Beans aide pour la Programmation Orientée Aspect. 
+
+                Par exemple, pour sélectionner tous les Beans dont le nom finit par «Metier».
+
+        ** A l’origine, en configuration XML, ce nom était l’ID XML du Bean 
+
+            Garantit l’unicité dans un fichier XML (norme XML) 
+
+            Mais cela interdisait certains caractères («/») ainsi que de donner deux noms différents au même Bean (il fallait utiliser un alias) 
+
+ 
+
+=== Spring : nommage avec annotations
+
+    * Configuration par défaut : «todosServiceImpl» 
+
+@Component
+public class TodosServiceImpl {
+
+private UserService userService;
+
+}
+
+    * En nommant explicitement le Bean 
+[source,java]
+@Component ("todosService")
+public class TodosServiceImpl {
+    private UserService userService;
+}
+ 
+
+=== Spring : annotations spécifiques
+
+    * Pour les couches standards, remplace @Component 
+
+    * Pour la DAO :
+        @Repository("clientDao")
+
+    * Pour la couche de service :
+        @Service("helloBanque")
+
+    * Dans org.springframework.stereotype.* 
+
+ 
+
+=== Scope des beans Spring
+
+    * singleton  Scopes a single bean definition to a single object instance per Spring IoC container. 
+
+    * prototype Scopes a single bean definition to any number of object instances. 
+
+    * request  Scopes a single bean definition to the lifecycle of a single HTTP request; that is each and every HTTP request will have its own instance of a bean created off the back of a single bean definition. Only valid in the context of a web-aware Spring ApplicationContext. 
+
+    * session  Scopes a single bean definition to the lifecycle of a HTTP Session. Only valid in the context of a web-aware Spring ApplicationContext. 
+
+    * global session Scopes a single bean definition to the lifecycle of a global HTTP Session. Typically only valid when used in a portlet context. Only valid in the context of a web-aware Spring ApplicationContext. 
+
+ 
+
+=== Les Scopes en VF
+
+    * Par défaut, les Beans Spring sont dits être des «singletons» 
+
+        ** Ils ne sont instanciés qu’une seule fois par contexte Spring 
+
+        ** Ils ne sont pas de «vrais» singletons : on peut lancer deux fois la même classe (deux Beans ayant la même implémentation) 
+
+    * Les Beans sont instanciés et configurés au démarrage du contexte Spring 
+
+        ** Permet de valider que la configuration est correcte dès le démarrage de l’application 
+
+        ** Permet de gagner en performance : on ne crée pas un grand nombre d’instances d’objets pour rien 
+
+ 
+
+=== Les Scopes en VF…
+
+    * Le fait d’avoir des singletons a un impact en environnement multi-threadé 
+
+        ** Les variables de classe sont partagées entre les threads 
+
+        ** Les beans doivent donc être thread-safe 
+[source,java]
+@Service
+@Transactional
+public class TodosServiceImpl implements TodosService {
+    @Inject
+    private UserService userService;
+}
+ 
+
+=== Les Scopes en VF…
+
+    * Que faire si vous avez besoin de plusieurs instances du même Bean ? 
+
+        ** Exemple très fréquent : il contient des données de l’utilisateur 
+
+    * On peut donner un «scope» à un Bean 
+
+        ** singleton, session, flow, request, prototype 
+
+        ** prototype : une nouvelle instance à chaque fois qu’on injecte ce Bean 
+[source,xml]
+<bean id="todoService" class="example.TodoServiceImpl" scope="prototype" >
+    <property name="userService" ref="userService" />
+</bean>
+ 
+
+=== It’s alive !
+
+    * La vie des Beans est gérée par Spring 
+
+        ** C’est Spring qui crée les Beans 
+
+        ** C’est Spring qui les «enrichit» avec la Programmation Orientée Aspect 
+
+        ** C’est Spring qui les injecte 
+
+        ** C’est Spring qui les détruit (parfois) 
+
+    * Ce cycle de vie est défini par Spring 
+
+        ** Spring propose également des options de configuration pour agir sur les Beans, au moment de leur création ou de leur destruction 
+
+ 
+
+=== Etape 1 : lecture de la config
+
+    * Au démarrage, Spring lit sa configuration 
+
+        ** Dans un fichier XML 
+
+        ** Dans les annotations 
+
+        ** Dans la configuration Java de Spring 
+
+    * Spring possède alors un modèle mémoire de la configuration qu’on lui a fournie 
+
+        ** A partir de ce moment, Spring ne différencie plus d’où provient la configuration 
+
+        ** Il est donc impossible d’avoir un comportement différent entre une configuration XML et une configuration par annotation (= en cas de problème, c’est votre configuration qui est mauvaise) 
+
+ 
+
+=== BeanFactoryPostProcessor
+
+    * Spring propose à ce moment un premier point d’extension : le BeanFactoryPostProcessor 
+
+        ** Il permet de modifier la configuration des Beans 
+
+    * Exemple typique : le PropertyPlaceholderConfigurer 
+
+        ** Permet de remplacer des variables (de type ${} ) par des valeurs externes à l'application, par exemple en provenance d’un fichier .properties 
+
+        ** Très souvent utilisé, le fichier plat pouvant être modifié facilement par des administrateurs ou des scripts 
+
+ 
+
+=== Exemple
+
+[source,xml]
+----
+<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" >
+    <property name="locations" value="classpath:com/foo/jdbc.properties" />
+</bean>
+
+<bean id="dataSource" destroy-method= "close"
+        class="org.apache.commons.dbcp.BasicDataSource" >
+    <property name="driverClassName" value="${jdbc.driverClassName}" />
+    <property name="url" value="${jdbc.url}" />
+    <property name="username" value="${jdbc.username}" />
+    <property name="password" value="${jdbc.password}" />
+</bean>
+----
+
+=== Etape 2 : instantiation et injection
+
+    * Une fois la configuration traitée par Spring, celui-ci va créer les Beans (scope Singleton) qui ont été définis 
+
+        ** Il crée les Beans en utilisant l’API Reflection de Java 
+
+        ** Il crée les Beans dans le bon ordre 
+
+            *** Il fait normalement l’injection de dépendance après l’instantiation des Beans
+
+            *** Sauf pour l’injection de dépendance par constructeur
+
+            *** Attention aux dépendances cycliques dans ce cas (mais elles sont généralement la preuve d’une mauvaise architecture)
+
+    * C’est au moment de l’injection que Spring crée des «proxy» sur les objets 
+
+        ** Si nécessaire, Spring génère une implémentation «enrichie» des objets 
+
+        ** Ajout des transactions, de la sécurité, etc... 
+
+            *** C’est ainsi que fonctionne la Programmation Orientée Aspect
+
+    * Tant que l’injection de dépendance n’a pas eu lieu, les objets ne sont donc pas prêts à être utilisés 
+
+ 
+
+=== Etape 3 : init des beans
+
+    * Une fois tous les Beans créés et injectés par Spring, un nouveau point d’extension est disponible 
+
+        ** Il ne faut pas utiliser les constructeurs des objets pour faire des choses complexes, car les Beans ne sont pas encore prêts (l’injection de dépendance n’est pas encore faite) 
+
+    * On peut alors initialiser les Beans, avec 3 méthodes 
+
+        ** Une annotation @PostConstruct 
+
+        ** Une configuration XML (attribut «init-method») 
+
+        ** Une interface à implémenter (InitializingBean) 
+
+    * La manière recommandée est d’utiliser l’annotation 
+
+    * Elle est standardisée (JSR 250) : aucune dépendance sur Spring ! 
+
+        ** Elle est simple et peu intrusive 
+
+ 
+
+=== Exemple
+
+[source,java]
+----
+@Service
+@Transactional
+public class TodosServiceImpl {
+
+        @PostConstruct
+        public void init() {
+                System. out.println("Bonjour de TodosServiceImpl" );
+        }
+}
+----
+
+    * Astuce : c’est un bon moyen pour vérifier si vos Beans sont bien démarrés 
+
+ 
+
+=== Etape 4 : Run
+
+    * Une fois les Beans instanciés, injectés et initialisés le conteneur Spring est prêt à l’emploi 
+
+        ** Il devient accessible (on peut lui demander un Bean via l’API) 
+
+        ** L’application est prête et est démarrée 
+
+    * C’est dans cette phase que votre application se trouve 99% du temps 
+
+        ** Sauf si elle crashe souvent :-) 
+
+ 
+
+=== Etape 5 : Destruction (option)
+
+@Service
+
+@Transactional
+
+public class TodosServiceImpl {
+
+        @PreDestroy
+
+        public void destroy() {
+
+                System. out.println("Au revoir de TodosServiceImpl" );
+
+        }
+
+}
+
+    * ATTENTION : pour un Prototype cette méthode ne sera pas appelée («fire and forget») 
+
+ 
+
+=== Cas particulier
+
+    * Que faire si vos beans sont lents au démarrage ? 
+
+        ** Un exemple possible : l’initialisation d’un cache 
+
+    * On ne va pas vouloir suivre le cycle de vie classique : on veut avoir des Beans uniquement instanciés à la demande : c’est le «lazy loading» 
+
+    * C’est généralement une fausse bonne idée : 
+
+        ** Le premier utilisateur à utiliser cet objet va alors subir le chargement 
+
+        ** Il y a toujours un risque de mauvaise configuration : mieux vaut être sûr du bon lancement de ses Beans au démarrage de l’application 
+
+        ** Une solution : avoir une configuration d’infrastructure différente suivant votre environnement, et ne faire le lazy loading qu’en développement 
+[source,java]
+<bean id="todoService" class="example.TodoServiceImpl" lazy-init="true" >
+        <property name="userService" ref="userService" />
+</bean>
+ 
+
+=== Démarrage de Spring
+
+    * Pour démarrer Spring, il faut créer une instance de l’interface ApplicationContext 
+
+        ** Plusieurs implémentations existent 
+
+        ** Elles sont spécialisées pour certains environnements : application Web, test unitaire, etc... 
+
+        ** Elles sont toutes sur le même principe : il faut charger la configuration Spring (habituellement, charger le fichier de configuration XML) 
+
+    * La manière la plus simple : 
+[source,java]
+ApplicationContext ctx =
+new ClassPathXmlApplicationContext("application-context.xml");
+ 
+
+=== Astuces config
+
+    * Pour lire le fichier dans le système de fichier : 
+[source,java]
+ApplicationContext ctx = new FileSystemXmlApplicationContext("/home/application/config.xml");
+
+    * Pour lire plusieurs fichiers (varargs) : 
+[source,java]
+ApplicationContext ctx = new FileSystemXmlApplicationContext("conf-1.xml" ,"conf-2.xml");
+xml
+    * Pour lire tous les fichiers d’un répertoire (pattern Ant) : 
+[source,java]
+ApplicationContext ctx = new FileSystemXmlApplicationContext("/home/application/*.xml");
+ 
+
+=== Démarrage Web
+
+    * Spring est lancé via un listener dans le fichier web.xml 
+[source,java]
+----
+<context-param>
+
+<param-name>contextConfigLocation</param-name>
+<param-value>classpath:META-INF/spring/application-context.xml</param-value>
+</context-param>
+
+<listener>
+<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+</listener>
+----
+    * Note : cette configuration lance uniquement Spring IoC, sans Spring MVC 
+
+ 
+
+=== Arrêt
+
+    * L’application peut parfaitement être arrêtée «normalement» ou crasher... 
+
+    * Si vous voulez explicitement arrêter Spring : 
+
+applicationContext.close();
+
+    * Les Beans sont informés qu’ils doivent s’arrêter (@PreDestroy est appelé) 
+
+    * Les Beans sont détruits 
+
+    * Le context Spring n’est alors plus utilisable 
+
+ 
+
+=== Spring injection
+
+    * Des types simples (eg String, int, …) 
+
+    * Des collections : 
+[source,xml]
+<property name="emails">
+<map>
+<entry key="formation" value="formation@ippon.fr" />
+<entry key="contact" value="contact@ippon.fr" />
+<entry key="recrutement" value="recrutement@ippon.fr" />
+</map>
+</property>
+
+    * Des beans dans d’autres beans 
+
+    * … 
+
+ 
+
+=== Spring injection : innerBean
+
+    * Exemple avec Hibernate : 
+[source,xml]
+----
+<bean id="entityManagerFactory"
+  class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+    <property name="dataSource" ref="dataSource"/>
+    <property name="jpaVendorAdapter">
+    <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="database" value="${jpavendoradapter.database}"/>
+        <property name="databasePlatform"
+          value="${jpavendoradapter.databaseplatform}"/>
+        <property name="showSql" value="${jpavendoradapter.showsql}"/>
+        <property name="generateDdl"
+          value="${jpavendoradapter.generateddl}"/>
+        </bean>
+        </property>
+        <property name="persistenceXmlLocation"
+          value="classpath:META-INF/persistence.xml"/>
+</bean>
+----
+
+=== Spring : Exemple complet
+
+    * Architecture générale de l’application Banque 
+
+ 
+
+=== Spring : exemple
+
+    * 1 : config accès DataSource – persistance.xml 
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="1.0"
+xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
+
+<persistence-unit name="jpa" transaction-type="RESOURCE_LOCAL" >
+</persistence-unit>
+
+</persistence>
+----
+ 
+
+=== Spring : exemple
+
+    * 2 : config accès DataSource – spring-config.xml 
+[source,xml]
+----
+<!-- la source de donnéees DBCP -->
+<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+
+        destroy-method="close">
+
+<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+
+<property name="url" value="jdbc:mysql://localhost:3306/banque" />
+
+<property name="username" value="root" />
+
+<property name="password" value="root" />
+
+</bean>
+----
+ 
+
+=== Spring : exemple
+
+    * 3 : injection dans la DAO : spring-config.xml 
+[source,xml]
+----
+<bean id="entityManagerFactory"
+  class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+    <property name="dataSource" ref="dataSource" />
+    <property name="jpaVendorAdapter">
+<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+    <property name="databasePlatform" value="org.hibernate.dialect.MySQLDialect" />
+    <property name="generateDdl" value="true" />
+</bean>
+</property>
+</bean>
+----
+ 
+
+=== Spring : exemple
+
+    * 3 : injection dans la DAO : Banque1.java 
+[source,java]
+----
+package dao;
+
+@Transactional
+public class Banque1 implements IBanque {
+        @PersistenceContext
+        private EntityManager em;
+
+        @Transactional(readOnly = true)
+        public Collection<Client> getAllClients() {
+
+        ...
+----
+ 
+
+=== Spring : exemple
+
+    * 4 : injection dans Service : spring-config.xml 
+[source,xml]
+----
+<!– définition d’un bean [singleton] -->
+<bean id="banqueDao" class="dao.Banque1" />
+
+<!– définition d’un bean [singleton] et injection -->
+<bean id="service" class="service.Service1">
+        <property name="banque" ref="banqueDao" />
+</bean>
+----
+ 
+
+=== Spring : exemple
+
+    * 4 : injection dans Service : Service1.java 
+[source,java]
+----
+package service;
+
+@Service
+@Transactional
+public class Service1 implements IService {
+        // couche [dao] : injection automatique par Spring
+        private IBanque banque;
+
+        public void setBanque(IBanque banque) {
+                this.banque = banque;
+        }
+----
+
+=== Spring : exemple
+
+    * 5 : Gestion des transactions : spring-config.xml 
+[source,xml]
+----
+<!-- le gestionnaire de transactions -->
+<tx:annotation-driven transaction-manager="txManager" />
+
+<bean id="txManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory"
+            ref="entityManagerFactory" />
+</bean>
+----
+ 
+
+=== Spring : exemple
+
+    * La même en FULL annotations 
+
+ 
+
+=== Une configuration typique
+
+    * Des fichiers «d’infrastructure» 
+
+        ** Plusieurs fichiers, découpés en fonction de leur périmètre fonctionnel 
+
+        ** Exemple : un fichier pour configurer la sécurité, un fichier pour configurer la base de données 
+
+    * Des annotations dans les Beans de la couche «métier» 
+
+        ** Les développeurs gagnent ainsi en temps de développement 
+
+        ** Facilite le refactoring 
+
+        ** Recommandation : avoir un IDE qui «comprend» cette configuration (IntelliJ) 
+
+ 
+=== Une configuration typique
+
+    * Généralement, ces variables injectées sont des paramètres, qui dépendent de l’environnement 
+
+        ** Elles se trouvent dans la configuration «d’infrastructure» 
+
+        ** Par exemple : l’URL, le login et le mot de passe de la base de données 
+
+    * Il est plus propre de les externaliser dans un fichier de properties 
+[source,xml]
+----
+<context:property-placeholder
+    location="classpath*:META-INF/infrastructure/database.properties"/>
+<bean id="dataSource"
+        class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="user" value="${dataSource.username}"/>
+        <property name="password" value="${dataSource.password}"/>
+        ...
+</bean>
+----
+
+=== Bonnes pratiques
+
+    * La configuration métier est réalisée à l’aide d’annotations 
+
+        ** Elle ne change pas, quel que soit l’environnement 
+
+        ** Elle est ainsi plus rapide à réaliser pour les développeurs 
+
+        ** On utilise l’auto-wiring par type : on ne nomme même pas les Beans 
+
+ 
+
+=== Bonnes pratiques
+
+    * La configuration d’infrastructure est stockée dans plusieurs fichiers XML : 
+
+        ** Tous sont dans le même répertoire : classpath:META-INF/spring/*.xml 
+
+        ** Ces fichiers sont spécialisés : applicationContext-database.xml, applicationContext-security.xml, etc... 
+
+        ** Ces fichiers sont paramétrables via des fichiers de properties (utilisation du PropertyPlaceholderConfigurer) 
+
+        ** Il est également possible d’avoir des fichiers de configuration spécifiques par environnement, si les fichiers de properties ne sont pas suffisants 
+
+ 
+
+=== Spring : les transactions
+
+    * Spring propose une couche d’abstraction 
+
+        ** Gère les transactions JDBC, Hibernate, JTA etc... de manière homogène 
+
+        ** Permet de simplement configurer ses transactions : utilisation d’annotations ou d’XML, sans utilisation obligatoire de code 
+
+    * Cela permet d’avoir une meilleure architecture 
+
+        ** Les transactions sont déclarées dans la couche métier (service), et non dans la couche d’accès aux données (repository / DAO) 
+
+        ** Les transactions ne dépendent pas d’une technologie particulière d’accès aux données (JDBC) 
+
+ 
+
+=== Les transactions version simple
+
+    * Configurer un gestionnaire de transaction 
+[source,xml]
+<bean id="transactionManager"
+    class="org.springframework.jdbc.datasource.DataSourceTransactionManager" >
+    <property name="dataSource" ref="dataSource" />
+</bean>
+
+    * Dire à Spring que l’on veut utiliser les annotations 
+[source,xml]
+<tx:annotation-driven/>
+
+    * Utiliser les annotations 
+[source,java]
+@Transactional
+public void uneMethodeMetier() {
+
+
+
+=== Transactions
+
+    * Le gestionnaire de transaction est une classe fournie par Spring 
+
+        ** Il fait partie de l’infrastructure 
+
+        ** Il est spécifique à la technologie utilisée 
+
+        ** Hors JTA, il a besoin d’une Data Source pour être configuré 
+
+        ** Par convention, il possède l’id «transactionManager» 
+
+    * Si vous êtes dans un serveur d’applications (Websphere, JBoss...), Spring peut retrouver automatiquement le gestionnaire de transactions de ce serveur (utilisant l’API JTA) : 
+
+        <tx:jta-transaction-manager/>
+ 
+
+=== @Transactional
+
+    * L’annotation @Transactional peut être mise sur une classe (toutes les méthodes publiques sont transactionnelles) ou sur une méthode 
+
+    * Cette annotation peut avoir un certain nombre de paramètres : Isolation, Propagation, Timeout, readOnly… 
+[source,java]
+@Service
+@Transactional
+public class TodoListsServiceImpl implements TodoListsService {
+        @Transactional (readOnly = true)
+        public TodoList findTodoList(String listId) {
+        // Code métier, utilisant Hibernate par exemple
+        }
+}
+ 
+
+=== Transaction read-only
+
+    * On peut marquer une transaction comme étant «read-only» 
+
+        ** On indique qu’elle ne va pas modifier de données en base 
+
+        ** En lecture, il est toujours important d’utiliser des transactions, ne serait-ce que pour les performances 
+
+    * Cet attribut est important 
+
+        ** Hibernate va le comprendre, il ne va alors plus vérifier s’il doit impacter des modifications sur les objets en base : meilleures performances 
+
+        ** Certains drivers JDBC vont le comprendre (Oracle ne vous autorisera plus qu’à faire des «SELECT») : meilleure qualité 
+
+ 
+
+=== Transactions
+
+    * L’utilisation des transactions est essentielle, elle vous garantie la qualité des données et de bonnes performances 
+
+    * La configuration des transactions avec Spring est très simple 
+
+        ** Utilisation des annotations 
+
+        ** Une configuration avancée reste un simple paramétrage 
+
+        ** En termes d’architecture, cela permet de gérer les transactions au niveau de la couche métier (service), et plus dans les couches basses (repository/DAO) 
+
+ 
+
+=== Transactions
+
+    * Exemple de code « propre » pour la couche de service : 
+[source,java]
+----
+@Transactional(readOnly = true)
+public Collection<Client> getAllClients() {
+        return clientDao.findAll();
+}
+
+@Transactional(rollbackFor=ClientNotFound.class)
+public void updateClient(Client client) throws ClientNotFound {
+        Client c = clientDao.findOne(client.getId());
+        if (c==null) throw new ClientNotFound(); c.setAdresse(client.getAdresse());
+        c.setNom(client.getNom());
+        c.setPrenom(client.getPrenom());
+}
+----
+ 
+
+=== Profils
+
+    * Les profils sont une nouveauté Spring 3.1 
+
+        ** Ils permettent de simplifier le découpage en fonction de l’environnement 
+
+        ** Ils fonctionnent en configuration XML et Java (annotation @Profile à placer sur le Bean) 
+
+        ** Ils simplifient encore plus la configuration d’infrastructure 
+
+ 
+
+=== Profils
+
+    * Pour choisir un profil au démarrage 
+
+        ** Utiliser une variable d’environnement : 
+
+        ** Le configurer au démarrage via l’API : 
+
+ 
+
+ 
+
+=== Résumé Architecture
+ 
+
+Exemple
+
+    * Architecture générale d’une application 
+
+ 

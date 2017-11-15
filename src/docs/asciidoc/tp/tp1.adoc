@@ -68,7 +68,10 @@ public class Livret extends Compte {
 
 . Générez à l'aide des assistants les getters/setters/constructeurs par défaut/full.
 
-. Ajoutez les annotations minimales aux classes pour les rendre persistantes (Id, relations, types temporels…). Utilisez pour cela la refcardZ rc022-JPA_Online.pdf
+. Ajoutez les annotations minimales aux classes
+ pour les rendre persistantes (Id, relations, types temporels…).
+
+ Utilisez pour cela la refcardZ rc022-JPA_Online.pdf
 
 . Ajoutez dans resources : META-INF/persistence.xml
 [source,xml]

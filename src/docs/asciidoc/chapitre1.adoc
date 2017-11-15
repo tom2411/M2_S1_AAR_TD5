@@ -12,6 +12,7 @@ Il y a des différences fondamentales entre un tuple dans une table et un objet 
 * De nombreux types de données sont différents (par exemple il y a de nombreuses façons de stocker une String en base de données)
 * Les contraintes de validation ne sont pas gérées de la même manière
 
+
 Le but de la solution d'ORM sera d'alléger ou de simplifier ces problèmes
 
 === Historique
@@ -217,10 +218,10 @@ enregistrés les objets persistants
 (données de la BD)
 ** éphémères (transients), non persistants
 
-Un gestionnaire de persistance gère la
+* Un gestionnaire de persistance gère la
 persistance des objets persistants
 
-Des méta-données, enregistrées dans un fichier
+* Des méta-données, enregistrées dans un fichier
 XML, décrivent les classes des objets persistants
 
 === JDO : ressources
@@ -369,19 +370,18 @@ public class Person implements Serializable {
 
 === JPA : mapping
 
-Ce mapping utilise uniquement des annotations JPA qui se trouvent :
+* Ce mapping utilise uniquement des annotations JPA qui se trouvent
+** Au niveau de la classe, pour la mapper sur une table donnée
+** Au niveau des champs, qui correspondent aux colonnes de la table
 
-* Au niveau de la classe, pour la mapper sur une table donnée
-* Au niveau des champs, qui correspondent aux colonnes de la table
-
-La configuration est en partie implicite
-
-* Les champs sans annotations sont par défaut mappés sur des colonnes ayant le même nom qu’eux
+* La configuration est en partie implicite
+** Les champs sans annotations sont par défaut mappés sur des colonnes ayant le même nom qu’eux
 Sinon, on peut les paramétrer avec l’annotation @Column
 
-* Si le champ ne doit pas être mappé, il faut le marquer avec @Transient
+** Si le champ ne doit pas être mappé, il faut le marquer avec @Transient
 
-Dans le cas le plus simple, il suffit d’annoter la classe avec @Entity et de définir la clé primaire avec @Id
+* Dans le cas le plus simple, @Entity et @Id suffisent
+
 
 === JPA : mapping XML
 
@@ -390,18 +390,25 @@ Alternative : fichier orm.xml dans META-INF
 [source,xml]
 ----
 <?xml version="1.0" encoding="UTF-8" ?>
-<entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm"    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"     xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm    http://java.sun.com/xml/ns/persistence/orm_1_0.xsd"    version="1.0">
+<entity-mappings
+  xmlns="http://java.sun.com/xml/ns/persistence/orm"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm
+  http://java.sun.com/xml/ns/persistence/orm_1_0.xsd"
+  version="1.0">
 <description>My First JPA XML Application</description>
 
 <package>entity</package>
-	<entity class="entity.Employee" name="Employee">                	<table name="EMPLOYEETABLE"/>
+	<entity class="entity.Employee" name="Employee">
+	    <table name="EMPLOYEETABLE"/>
 		<attributes>
 			<id name="empId">
 				<generated-value strategy="TABLE"/>
            </id>
            <basic name="empName">
-                <column name="EMP_NAME" length="100"/>            			</basic>
-           <basic name="empSalary"> </basic>
+                <column name="EMP_NAME" length="100"/>
+           </basic>
+           <basic name="empSalary"/>
         </attributes>
    </entity>
 </entity-mappings>
@@ -412,7 +419,7 @@ Alternative : fichier orm.xml dans META-INF
 * l'EntityManager est la classe principale, qui permet de requêter, créer ou supprimer des objets en base de données
 * La persistance est transparente : dès qu’un objet est géré par le EntityManager, ses modifications seront
 automatiquement répercutées en base de données _à la fin de la transaction_
-* Pour mettre à jour un objet, il suffit donc d’appeler ses setters, et d’attendre la fin de la transaction
+* Pour mettre à jour un objet, il suffit donc d’appeler ses setters, _et d’attendre la fin de la transaction_
 
 === JPA : avec un container
 
@@ -426,7 +433,9 @@ public class PersonRepository {
 		return em.merge(person);
 	}
 	public List<Person> findAll() {
-		return em.createNamedQuery("findAllPersons").getResultList();
+		return em
+		    .createNamedQuery("findAllPersons")
+		    .getResultList();
 	}
 	public Person findPerson(String login) {
 		return em.find(Person.class, login);
@@ -475,21 +484,19 @@ emf.close();
 
 === JPA : accès aux champs
 
-En Java, il est conseillé d’utiliser plutôt les accesseurs
+* En Java, il est conseillé d’utiliser plutôt les accesseurs
 que les accès directs aux champs (meilleur contrôle des valeurs)
 
-Pour JPA c’est différent : l’accès par accesseur oblige à avoir des setters et getters pour toutes les propriétés, ce qui peut être néfaste et aller à l’encontre du souci d’encapsulation
-
+* Pour JPA c’est différent : l’accès par accesseur oblige à avoir des setters et getters pour toutes les propriétés, ce qui peut être néfaste et aller à l’encontre du souci d’encapsulation
 Par exemple, les setters peuvent permettre à l’utilisateur de ne pas utiliser une méthode ajoutée pour obliger à bien mettre à jour les 2 bouts d’une association bidirectionnelle
 
 ifdef::backend-revealjs[=== !]
 
-L’accès par champ permet de distinguer l’accès aux attributs par JPA
+* L’accès par champ permet de distinguer l’accès aux attributs par JPA
 et l’accès aux attributs par l’application (effectué par setters et getters)
-
 Il est donc conseillé de choisir plutôt l’accès par champ avec JPA
 
-Pour des cas particuliers il est toujours possible d’utiliser @Access(PROPERTY) sur certains attributs ;
+* Pour des cas particuliers il est toujours possible d’utiliser @Access(PROPERTY) sur certains attributs ;
 mais attention, un traitement complexe dans un setter peut occasionner un problème s’il dépend de la valeur d’autres attributs (pas nécessairement initialisés à ce moment)
 
 
