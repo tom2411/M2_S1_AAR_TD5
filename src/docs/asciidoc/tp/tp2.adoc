@@ -10,7 +10,7 @@ ifndef::resourcesdir[:resourcesdir: ../../main/resources]
 
 Le but de ce TP est de réaliser une architecture type java SE complète avec Spring
 
-image::tp2archi1.png[scaledwidth=100%]
+image::tp2arch1.png[scaledwidth=100%]
 
 
 * Rappel des pré-requis
