@@ -1,0 +1,313 @@
+= AAR TP2 : Intégration avec Spring
+Frédéric Moal <frederic.moal@univ-orleans.fr>
+v1.0, 2017-10-26: une première version
+ifndef::imagesdir[:imagesdir: ../images]
+ifndef::sourcedir[:sourcedir: ../../main/java]
+ifndef::resourcesdir[:resourcesdir: ../../main/resources]
+
+
+== Architecture standard avec Spring
+
+Le but de ce TP est de réaliser une architecture type java SE complète avec Spring
+
+image::tp2archi1.png[scaledwidth=100%]
+
+
+* Rappel des pré-requis
+
+** MySQL doit être lancé sur localhost
+
+** avec docker :
+[source,bash]
+docker run --name mysql -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 -d mysql
+
+** Client Mysql avec docker :
+[source,bash]
+docker run -it --link mysql:mysql --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD"'
+
+
+== Exercice 1 : en config XML
+
+Pour cela, vous allez reprendre les différentes couches (modele, dao, service)
+réalisées dans le TP précédent, mais en demandant à Spring de gérer les transactions
+et la création puis l'injection des couches les unes dans les autres.
+
+Pour vous aider à écrire la couche DAO, récupérez dans les sources :AbstractDao.java et AbstractDaoImpl.java
+qu'il suffit d'instancier pour les 3 objets Client, Compte, Livret
+
+[source,java]
+----
+// exemple de ClientDao
+
+// l'interface :
+public interface ClientDao extends AbstractDao<Client> {
+}
+
+// puis l'implémentation JPA :
+public class ClientDaoImpl extends AbstractDaoImpl<Client> implements ClientDao {
+    public ClientDaoImpl() {
+        this(Client.class);
+    }
+    public ClientDaoImpl(Class<Client> entityClass) {
+        super(entityClass);
+    }
+}
+----
+
+
+Pour complétez la configuration Spring ci-dessous, vous disposez de la refcardz Spring,
+ainsi que d'un squelette de fichier de configuration XML spring-config.xml :
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd">
+
+    <!-- couches applicatives : DAO -->
+    <!-- A DEFINIR -->
+    <!-- couches applicatives : facade session, service -->
+    <!-- A DEFINIR AVEC INJECTION -->
+
+    <!-- Loading JPA -->
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+            </bean>
+        </property>
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+                <prop key="hibernate.hbm2ddl.auto">create</prop>
+                <prop key="hibernate.connection.release_mode">after_transaction</prop>
+                <prop key="hibernate.show_sql">false</prop>
+            </props>
+        </property>
+        <property name="loadTimeWeaver">
+            <bean class="org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver" />
+        </property>
+    </bean>
+
+    <!-- la source de données MySQL -->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+        <property name="url" value="jdbc:mysql://localhost:3306/banque" />
+        <property name="username" value="root" />
+        <property name="password" value="" />
+    </bean>
+
+    <!-- le gestionnaire de transactions -->
+    <tx:annotation-driven transaction-manager="txManager" />
+    <bean id="txManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory" />
+    </bean>
+
+    <!-- traduction des exceptions -->
+    <bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+
+    <!-- persistence -->
+    <bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />
+
+</beans>
+----
+
+
+=== Chargement d'un fichier de properties pour la config de la BD par variables
+
+Dans spring-config.xml :
+[source,xml]
+<!-- Chargement d'un fichier de properties pour la config JDBC (driver, login,...) -->
+<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" >
+    <property name="locations" value="classpath:jdbc.properties" />
+</bean>
+
+jdbc.properties
+[source,properties]
+jdbc.driverClassName=com.mysql.jdbc.Driver
+jdbc.url=jdbc:mysql://localhost:3306/banque
+jdbc.username=root
+jdbc.password=root
+
+Utilisation dans spring-config.xml :
+[source,xml]
+<!-- configuration de la couche JDBC : définition de la datasource à utiliser -->
+<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    <property name="driverClassName" value="${jdbc.driverClassName}"/>
+    <property name="url" value="${jdbc.url}"/>
+    <property name="username" value="${jdbc.username}"/>
+    <property name="password" value="${jdbc.password}"/>
+</bean>
+
+
+
+Pour que cela fonctionne, il faut bien sûr ajouter les dépendances de Hibernate+Spring dans votre pom.xml :
+[source,xml]
+----
+<dependency>
+    <groupId>org.hibernate</groupId>
+    <artifactId>hibernate-entitymanager</artifactId>
+    <version>4.3.7.Final</version>
+</dependency>
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-tx</artifactId>
+    <version>4.1.1.RELEASE</version>
+</dependency>
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-context</artifactId>
+    <version>4.1.1.RELEASE</version>
+</dependency>
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-orm</artifactId>
+    <version>4.1.1.RELEASE</version>
+</dependency>
+----
+
+
+Pour tester tout ça, un petit programme Main ; à adapter en fonction de votre couche de Service évidemment :
+[source,java]
+----
+package run;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import facade.BanqueService;
+import modele.*;
+
+public class SpringRun {
+    // couche service : SPRING
+    private static BanqueService service;
+    // constructeur
+    public static void main(String[] args) throws ParseException {
+        // configuration de l'application
+        ApplicationContext ctx =
+                new ClassPathXmlApplicationContext("spring-config.xml");
+        // récupération de la couche service
+        service = (BanqueService) ctx.getBean("banqueService");
+        // on vide la base
+        clean();
+        // on la remplit
+        fill();
+        // on vérifie visuellement
+        dumpClients();
+        dumpComptes();
+        dumpLivrets();
+        dumpClientsComptes();
+        virement();
+        dumpComptes();
+    }
+    private static void virement() {
+        service.virement(198, 205, 690.00);
+    }
+    // affichage contenu table Client
+    private static void dumpClients() {
+        System.out.format("[Clients]%n");
+        for (Client c : service.getAllClients()) {
+            System.out.print(c);
+            Client c2 = service.getClient(c.getId());
+            System.out.println("|"+c2);
+        }
+    }
+    // affichage contenu table Livret
+    private static void dumpLivrets() {
+        System.out.format("[Livrets]%n");
+        for (Livret a : service.getAllLivrets()) {
+            System.out.println(a);
+        }
+    }
+    // affichage des comptes
+    private static void dumpComptes() {
+        System.out.format("[Compte]%n");
+        for (Compte a : service.getAllComptes()) {
+            System.out.println(a);
+        }
+    }
+    // affichage des clients, avec leurs comptes respectifs
+    private static void dumpClientsComptes() {
+        System.out.println("[Clients/comptes]");
+        for (Client p : service.getAllClients()) {
+            for (Compte a : service.getComptesOfClient(p.getId())) {
+                System.out.format("[%s,%s]%n", p.getNom(), a.getId());
+            }
+        }
+    }
+    // remplissage tables
+    public static void fill() throws ParseException {
+        // crï¿½ation Clients
+        Client c1 = new Client(1003, "Martin", "Paul", "Orléans");
+        Client c2 = new Client(1015, "Dupont", "Sylvie", "Olivet");
+        Client c3 = new Client(1109, "Dupond", "Henri", "La ferté");
+
+        // ajout des Comptes/Livrets
+        c1.addCompte(new Compte(198,c1,2300.0,new SimpleDateFormat("dd/MM/yy").parse("31/01/2010")));
+        c2.addCompte(new Compte(203,c2,5440.0,new SimpleDateFormat("dd/MM/yy").parse("05/07/2001")));
+        c2.addCompte(new Livret(205,c2, 655.0,new SimpleDateFormat("dd/MM/yy").parse("05/07/2011"),0.05));
+        c3.addCompte(new Compte(243,c3, 450.0,new SimpleDateFormat("dd/MM/yy").parse("25/12/2013")));
+        // persistance des Clients avec leurs comptes/livrets
+        service.saveClients(new Client[]{c1,c2,c3});
+    }
+    // supression de tous les clients
+    public static void clean() {
+        // on supprime ttes les Clients et donc toutes les Comptes
+        for (Client Client : service.getAllClients()) {
+            service.deleteClient(Client.getId());
+        }
+    }
+}
+----
+
+== Exercice 2 : Full annotation avec Spring Boot
+
+Refaire la même application en mode Spring Boot en utilisant Spring data jpa.
+
+Nouveau projet maven vide avec la configuration pom.xml :
+[source,xml]
+----
+<parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>1.5.8.RELEASE</version>
+</parent>
+
+<properties>
+    <java.version>1.8</java.version>
+</properties>
+
+<dependencies>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+    </dependency>
+</dependencies>
+
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+        </plugin>
+    </plugins>
+</build>
+----
+
+Ajoutez un fichier application.properties dans les ressources :
+[source,properties]
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.datasource.url=jdbc:mysql://localhost:3306/banque
+spring.datasource.username=root
+spring.datasource.password=root
+
+
+
+cf
+https://spring.io/guides/gs/accessing-data-jpa/

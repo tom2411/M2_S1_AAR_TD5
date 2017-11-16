@@ -126,7 +126,9 @@ Une brève histoire de Spring
 
     * Il peut alors utiliser les fonctionnalités du serveur, pour en simplifier ou en abstraire le fonctionnement 
 
-    * Il peut également remplacer certaines fonctionnalités du serveur, si on juge que Spring propose une meilleure alternative 
+ifdef::backend-revealjs[=== !]
+
+    * Il peut également remplacer certaines fonctionnalités du serveur, si on juge que Spring propose une meilleure alternative
 
     * Généralement Spring est utilisé conjointement à un serveur d’applications léger : Tomcat ou Jetty 
 
@@ -153,6 +155,8 @@ dépendance)
 
 * Spring ORM : Classes utilitaires permettant une intégration intéressante des différentes
 framework de mapping O/R, notamment avec Hibernate
+
+ifdef::backend-revealjs[=== !]
 
 * Spring DAO : Classes utilitaires facilitant à l’extrême le développement d’une couche
 d’accès aux données en jdbc pur.
@@ -1315,4 +1319,9 @@ Exemple
 
     * Architecture générale d’une application 
 
- 
+
+== Spring MVC
+
+
+== Spring Security
+
