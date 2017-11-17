@@ -491,7 +491,7 @@ public class TodosServiceImpl implements TodosService {
 <context:component-scan base-package= "example.test" />
 </beans>
 
-    * Les Beans annotés @Component sont automatiquement créés 
+    * Les Beans annotés @Component sont automatiquement créés [Singleton]
 
     * Les Setters, constructeurs et champs annotés avec @Inject sont automatiquement injectés 
 
@@ -563,25 +563,23 @@ ifdef::backend-revealjs[=== !]
 
         ** Bien nommer les Beans aide pour la Programmation Orientée Aspect. 
 
-                Par exemple, pour sélectionner tous les Beans dont le nom finit par «Metier».
+           *** Par exemple, pour sélectionner tous les Beans dont le nom finit par «Metier».
 
         ** A l’origine, en configuration XML, ce nom était l’ID XML du Bean 
 
-            Garantit l’unicité dans un fichier XML (norme XML) 
+            *** Garantit l’unicité dans un fichier XML (norme XML)
 
-            Mais cela interdisait certains caractères («/») ainsi que de donner deux noms différents au même Bean (il fallait utiliser un alias) 
+            *** Mais cela interdisait certains caractères («/») ainsi que de donner deux noms différents au même Bean (il fallait utiliser un alias)
 
  
 
 === Spring : nommage avec annotations
 
     * Configuration par défaut : «todosServiceImpl» 
-
+[source,java]
 @Component
 public class TodosServiceImpl {
-
-private UserService userService;
-
+    private UserService userService;
 }
 
     * En nommant explicitement le Bean 
@@ -597,24 +595,24 @@ public class TodosServiceImpl {
     * Pour les couches standards, remplace @Component 
 
     * Pour la DAO :
-        @Repository("clientDao")
+        `@Repository("clientDao")`
 
     * Pour la couche de service :
-        @Service("helloBanque")
+        `@Service("helloBanque")`
 
-    * Dans org.springframework.stereotype.* 
+    * Dans `org.springframework.stereotype.*`
 
  
 
 === Scope des beans Spring
 
-    * singleton  Scopes a single bean definition to a single object instance per Spring IoC container. 
+    * singleton : Scopes a single bean definition to a single object instance per Spring IoC container.
 
-    * prototype Scopes a single bean definition to any number of object instances. 
+    * prototype : Scopes a single bean definition to any number of object instances.
 
-    * request  Scopes a single bean definition to the lifecycle of a single HTTP request; that is each and every HTTP request will have its own instance of a bean created off the back of a single bean definition. Only valid in the context of a web-aware Spring ApplicationContext. 
+    * request : Scopes a single bean definition to the lifecycle of a single HTTP request; that is each and every HTTP request will have its own instance of a bean created off the back of a single bean definition. Only valid in the context of a web-aware Spring ApplicationContext.
 
-    * session  Scopes a single bean definition to the lifecycle of a HTTP Session. Only valid in the context of a web-aware Spring ApplicationContext. 
+    * session : Scopes a single bean definition to the lifecycle of a HTTP Session. Only valid in the context of a web-aware Spring ApplicationContext.
 
     * global session Scopes a single bean definition to the lifecycle of a global HTTP Session. Typically only valid when used in a portlet context. Only valid in the context of a web-aware Spring ApplicationContext. 
 
@@ -750,7 +748,9 @@ public class TodosServiceImpl implements TodosService {
 
             *** Attention aux dépendances cycliques dans ce cas (mais elles sont généralement la preuve d’une mauvaise architecture)
 
-    * C’est au moment de l’injection que Spring crée des «proxy» sur les objets 
+ifdef::backend-revealjs[=== !]
+
+    * C’est au moment de l’injection que Spring crée des «proxy» sur les objets
 
         ** Si nécessaire, Spring génère une implémentation «enrichie» des objets 
 
@@ -776,7 +776,9 @@ public class TodosServiceImpl implements TodosService {
 
         ** Une interface à implémenter (InitializingBean) 
 
-    * La manière recommandée est d’utiliser l’annotation 
+ifdef::backend-revealjs[=== !]
+
+    * La manière recommandée est d’utiliser l’annotation
 
     * Elle est standardisée (JSR 250) : aucune dépendance sur Spring ! 
 
@@ -819,23 +821,20 @@ public class TodosServiceImpl {
 
 === Etape 5 : Destruction (option)
 
+[source,java]
+----
 @Service
-
 @Transactional
-
 public class TodosServiceImpl {
 
         @PreDestroy
-
         public void destroy() {
-
                 System. out.println("Au revoir de TodosServiceImpl" );
-
         }
-
 }
+----
 
-    * ATTENTION : pour un Prototype cette méthode ne sera pas appelée («fire and forget») 
+WARNING: pour un Prototype cette méthode ne sera pas appelée («fire and forget»)
 
  
 
@@ -847,7 +846,9 @@ public class TodosServiceImpl {
 
     * On ne va pas vouloir suivre le cycle de vie classique : on veut avoir des Beans uniquement instanciés à la demande : c’est le «lazy loading» 
 
-    * C’est généralement une fausse bonne idée : 
+ifdef::backend-revealjs[=== !]
+
+    * C’est généralement une fausse bonne idée :
 
         ** Le premier utilisateur à utiliser cet objet va alors subir le chargement 
 
@@ -870,31 +871,37 @@ public class TodosServiceImpl {
 
         ** Elles sont toutes sur le même principe : il faut charger la configuration Spring (habituellement, charger le fichier de configuration XML) 
 
-    * La manière la plus simple : 
+ifdef::backend-revealjs[=== !]
+
+    * La manière la plus simple :
+
 [source,java]
 ApplicationContext ctx =
-new ClassPathXmlApplicationContext("application-context.xml");
+    new ClassPathXmlApplicationContext("application-context.xml");
  
 
 === Astuces config
 
     * Pour lire le fichier dans le système de fichier : 
 [source,java]
-ApplicationContext ctx = new FileSystemXmlApplicationContext("/home/application/config.xml");
+ApplicationContext ctx =
+    new FileSystemXmlApplicationContext("/home/application/config.xml");
 
     * Pour lire plusieurs fichiers (varargs) : 
 [source,java]
-ApplicationContext ctx = new FileSystemXmlApplicationContext("conf-1.xml" ,"conf-2.xml");
-xml
-    * Pour lire tous les fichiers d’un répertoire (pattern Ant) : 
+ApplicationContext ctx =
+    new FileSystemXmlApplicationContext("conf-1.xml" ,"conf-2.xml");
+
+    * Pour lire tous les fichiers d’un répertoire (pattern Ant) :
 [source,java]
-ApplicationContext ctx = new FileSystemXmlApplicationContext("/home/application/*.xml");
+ApplicationContext ctx =
+    new FileSystemXmlApplicationContext("/home/application/*.xml");
  
 
 === Démarrage Web
 
     * Spring est lancé via un listener dans le fichier web.xml 
-[source,java]
+[source,xml]
 ----
 <context-param>
 
@@ -906,7 +913,8 @@ ApplicationContext ctx = new FileSystemXmlApplicationContext("/home/application/
 <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 </listener>
 ----
-    * Note : cette configuration lance uniquement Spring IoC, sans Spring MVC 
+
+CAUTION: cette configuration lance uniquement Spring IoC, sans Spring MVC
 
  
 

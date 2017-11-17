@@ -1,13 +1,20 @@
 = cours d'AAR : Architectures Applicatives Réparties
 Frédéric Moal <frederic.moal@univ-orleans.fr>
-:hardbreaks:
+2017-11-17
 :revnumber: {project-version}
 ifndef::imagesdir[:imagesdir: images]
 ifndef::sourcedir[:sourcedir: ../../main/java]
 // reveal options ; cf https://github.com/asciidoctor/asciidoctor-reveal.js/
 //:revealjs_theme: white
 //:revealjs_transition: linear
-:revealjs_center: false
+:navigation:
+:menu:
+:status:
+:title-slide-background-image: summit.png
+:title-slide-transition: zoom
+:title-slide-transition-speed: fast
+:icons: font
+:revealjs_center: true
 :customcss: css/summit.css
 
 
