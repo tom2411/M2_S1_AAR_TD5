@@ -17,8 +17,9 @@ ifndef::sourcedir[:sourcedir: ../../main/java]
 :revealjs_center: true
 :customcss: css/summit.css
 
+== Introduction
 
-== Le cours
+=== Le cours
 
 CAUTION: Code source du cours en Asciidoc
 
@@ -34,7 +35,7 @@ https://orleans.miage.fr/confluence/display/jee/Architectures+n-tiers
 Une note .speaker est incluse dans le pdf généré mais n'apparait pas explicitement dans les slides
 
 
-== Pendant la présentation des slides...
+=== Pendant la présentation des slides...
 
 * Press the `*s*` key to access speaker notes
 * You can press `*b*` or `*.*` to blank/unblank your current screen
@@ -48,7 +49,7 @@ Les notes de slides sont visibles dans la fenêtre speaker, mais aussi dans le p
 
 
 
-== Sources
+=== Sources
 
 * ORM
 ** http://www.hibernate.org
@@ -57,7 +58,7 @@ Les notes de slides sont visibles dans la fenêtre speaker, mais aussi dans le p
 ** http://spring.io
 ** https://github.com/javaee-samples/javaee7-samples
 
-== Veille techno
+=== Veille techno
 
 * blogs : xebia,ippon,octo...
 * dzone.com /developpez
@@ -66,7 +67,7 @@ Les notes de slides sont visibles dans la fenêtre speaker, mais aussi dans le p
 * twitter
 * ...
 
-== Historique
+=== Historique
 
 [.stretch]
 [options="header", cols="<,<,<", width="100%"]
@@ -110,13 +111,13 @@ Hibernate ORM 5, 2015, Java 8
 
 
 
-== Architectures n-tiers
+=== Architectures n-tiers
 
 [.thumb]
 image::archi-n-tiers.png[scaledwidth=100%]
 
 
-== Persistance en BD
+=== Persistance en BD
 
 Attention, deux rôles bien distincts :
 
@@ -129,7 +130,7 @@ Attention, deux rôles bien distincts :
 => deuxième partie de ce cours
 
 
-== Architecture classique
+=== Architecture classique
 
 [.thumb]
 image::archi-classique.png[scaledwidth=75%]
