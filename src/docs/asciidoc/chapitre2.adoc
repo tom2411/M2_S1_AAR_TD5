@@ -939,6 +939,7 @@ public class Service1 implements IService {
 * Des fichiers «d’infrastructure»
    ** Plusieurs fichiers, découpés en fonction de leur périmètre fonctionnel
    ** Exemple : un fichier pour configurer la sécurité, un fichier pour configurer la base de données
+ifdef::backend-revealjs[=== !]
 * Des annotations dans les Beans de la couche «métier»
    ** Les développeurs gagnent ainsi en temps de développement
    ** Facilite le refactoring
@@ -1048,6 +1049,7 @@ public class TodoListsServiceImpl implements TodoListsService {
 * On peut marquer une transaction comme étant «read-only»
     ** On indique qu’elle ne va pas modifier de données en base
     ** En lecture, il est toujours important d’utiliser des transactions, ne serait-ce que pour les performances
+ifdef::backend-revealjs[=== !]
 * Cet attribut est important
     ** Hibernate va le comprendre, il ne va alors plus vérifier s’il doit impacter des modifications sur les objets en base : meilleures performances
     ** Certains drivers JDBC vont le comprendre (Oracle ne vous autorisera plus qu’à faire des «SELECT») : meilleure qualité
@@ -1055,11 +1057,13 @@ public class TodoListsServiceImpl implements TodoListsService {
 
 === Transactions
 
-* L’utilisation des transactions est essentielle, elle vous garantie la qualité des données et de bonnes performances
+* L’utilisation des transactions est essentielle, elle vous garantie la qualité des données
+et de bonnes performances
 * La configuration des transactions avec Spring est très simple
    ** Utilisation des annotations
    ** Une configuration avancée reste un simple paramétrage
-   ** En termes d’architecture, cela permet de gérer les transactions au niveau de la couche métier (service), et plus dans les couches basses (repository/DAO)
+   ** En termes d’architecture, cela permet de gérer les transactions au niveau de la couche métier
+    (service), et plus dans les couches basses (repository/DAO)
 
  
 
@@ -1135,12 +1139,16 @@ méthodes existantes
 ** Ne fonctionne que sur des Beans Spring, et son utilisation est très simple
 ** Est largement suffisant pour des besoins "normaux", ce qui fait que la très
 grande majorité des utilisateurs de Spring utilise Spring AOP
+
+ifdef::backend-revealjs[=== !]
 * AspectJ est une technologie nettement plus complète et complexe
 ** Repose sur une modification du bytecode des classes Java
 ** Permet de faire des choses nettement plus compliquées : injecter des Beans
 Spring dans des classes standards, par exemple
 ** Est plus performant en production (mais cela a un impact mineur dans la
 réalité : à comparer avec un accès base de données)
+
+ifdef::backend-revealjs[=== !]
 * Spring AOP utilise le même "langage" que AspectJ, ce qui fait que
 l'on peut facilement migrer de Spring AOP vers AspectJ
 * Nous allons donc nous concentrer sur Spring AOP
@@ -1158,6 +1166,8 @@ l'on peut facilement migrer de Spring AOP vers AspectJ
 ** Nécessitent l'utilisation d'une interface
 ** L'utilisation d'interfaces est recommandée de toute manière (pour les
 tests et la souplesse de l'application)
+
+ifdef::backend-revealjs[=== !]
 * Si vos classes n'implémentent pas d'interface
 ** Spring AOP va utiliser CGLIB pour générer le proxy
 ** CGLIB est une librairie Open Source qui permet de générer des
@@ -1213,6 +1223,7 @@ code avant, après, autour de la méthode...
 Exception, le Join point ne sera pas appelé
 ** After returning advice : s’exécute après le Join point, si celui-ci s’
 est bien exécuté (s’il n’y a pas eu d'Exception)
+ifdef::backend-revealjs[=== !]
 ** After throwing advice : s’exécute si une Exception a été lancée
 pendant l’exécution du Join point
 ** After advice : s’exécute après le Join point, qu’il y ait eu une
@@ -1316,6 +1327,7 @@ nombreux autres objets
 ** Ne fonctionne qu’avec les Beans Spring
 ** Ne s’applique qu’aux méthodes publiques
 ** Ne fonctionne pas à l’intérieur d’un même Bean
+ifdef::backend-revealjs[=== !]
 * Cela est dû à l’utilisation des Proxys (on «passe» par une
 interface Java)
 * Le 3 ème point (une méthode d’un Bean qui appelle
@@ -1329,6 +1341,7 @@ les projets Spring
 Spring
 ** Fiable
 ** Très puissante
+ifdef::backend-revealjs[=== !]
 * Elle permet de rajouter dynamiquement du code à des
 méthodes, de manière transverse et non intrusive
 * Bien comprendre son fonctionnement est essentiel
