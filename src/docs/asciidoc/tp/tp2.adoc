@@ -322,8 +322,10 @@ https://spring.io/guides/gs/accessing-data-jpa/
 . Déplacer les classes précédentes dans un package `backend`
 . Ajouter un nouveau package `frontend` dans lequel vous ajouterez
 un controleur Spring MVC pour les urls `/clients`
-. Ajouter un formulaire statique permettant de saisir le no d'un client
-. Ajouter une page affichant un client et la liste de ses comptes,
+. Ajouter une page statique d'accueil qui redirigera automatiquement vers la page de sélection d'un client en passant
+par le contrôleur
+. Ajouter une page contenant un formulaire permettant de sélectionner à l'aide d'une liste déroulante un client enregistré en base
+. Ajouter une page affichant un client (et la liste de ses comptes),
 renvoyé par le controleur à partir du no passé en paramètre par le formulaire précédent
 
 
