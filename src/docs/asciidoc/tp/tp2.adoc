@@ -306,10 +306,12 @@ Nouveau projet maven vide avec la configuration pom.xml :
 
 Ajoutez un fichier application.properties dans les ressources :
 [source,properties]
-spring.jpa.hibernate.ddl-auto=create-drop
 spring.datasource.url=jdbc:mysql://localhost:3306/banque?useSSL=false
 spring.datasource.username=root
 spring.datasource.password=root
+# Hibernate config
+spring.jpa.hibernate.ddl-auto=create
+spring.jpa.properties.hibernate.dialect = org.hibernate.dialect.MySQL5Dialect
 
 
 cf
@@ -322,11 +324,14 @@ https://spring.io/guides/gs/accessing-data-jpa/
 . Déplacer les classes précédentes dans un package `backend`
 . Ajouter un nouveau package `frontend` dans lequel vous ajouterez
 un controleur Spring MVC pour les urls `/clients`
-. Ajouter une page statique d'accueil qui redirigera automatiquement vers la page de sélection d'un client en passant
+. Ajouter un formulaire statique permettant de saisir le no d'un client
+. Ajouter une page affichant un client et la liste de ses comptes,
+
+* Comme il est assez délicat de trouver le no généré pour un client,
+. Ajouter une page statique d'accueil qui redirigera (automatiquement) vers la page de sélection d'un client en passant
 par le contrôleur
 . Ajouter une page contenant un formulaire permettant de sélectionner à l'aide d'une liste déroulante un client enregistré en base
 . Ajouter une page affichant un client (et la liste de ses comptes),
 renvoyé par le controleur à partir du no passé en paramètre par le formulaire précédent
-
 
 cf https://spring.io/guides/gs/serving-web-content/
