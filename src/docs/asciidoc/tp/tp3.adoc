@@ -188,6 +188,17 @@ vous instanciez l'implémentation du Service,
 mais en lui passant des Mocks de Dao au lieu des vraies Dao
 (méthode createMock(Interface.class)).
 
-Testez la méthode de virement entre deux comptes
+- Testez la méthode de virement entre deux comptes
+(voir le cours de Yohan en M1 MIAGE Test et Qualité
+ou http://easymock.org/user-guide.html)
 
-(voir le cours de Yohan en M1 MIAGE Test et Qualité ou http://easymock.org/user-guide.html)
+- Modifiez la facade de service pour lever une exception `ClientNotFoundException`
+sur getClient(id) quand le client n'existe pas en base ;
+ajoutez les tests JUnit pour tester les deux situations.
+
+
+== Exercice 3 : Spring Boot reloaded
+
+Ré-écrire les mêmes tests mais pour la version Spring Boot de l'application
+
+cf le tuto : http://www.baeldung.com/spring-boot-testing
