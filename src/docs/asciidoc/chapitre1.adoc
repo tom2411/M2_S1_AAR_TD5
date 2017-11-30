@@ -1,9 +1,10 @@
-== ORM : gestion de la persitance des données
-ifndef::imagesdir[:imagesdir: images]
-ifndef::sourcedir[:sourcedir: ../../main/java]
+= ORM : gestion de la persitance des données
+ifndef::masterdoc[]
+include::header.adoc[]
+endif::masterdoc[]
 
 
-=== ORM ?
+== ORM ?
 
 Il y a des différences fondamentales entre un tuple dans une table et un objet d’une classe
 
@@ -15,7 +16,7 @@ Il y a des différences fondamentales entre un tuple dans une table et un objet 
 
 Le but de la solution d'ORM sera d'alléger ou de simplifier ces problèmes
 
-=== Historique
+== Historique
 
 * 1994 : TopLink, premier ORM au monde, en SmallTalk
 * 1996 : TopLink propose une version Java
@@ -28,7 +29,7 @@ Le but de la solution d'ORM sera d'alléger ou de simplifier ces problèmes
 * 2013 : JPA 2.1
 * 2017 : JPA 2.2
 
-=== Les solutions pour le mapping O/R
+== Les solutions pour le mapping O/R
 
 * Hibernate [natif]
 
@@ -242,6 +243,7 @@ https://cloud.google.com/appengine/docs/java/datastore/jdo/dataclasses
 * une _certaine_ indépendance du schéma de la BD / Structure des objets
 
 ifdef::backend-revealjs[=== !]
+
 Mais
 
 * connaissance obligatoire de la structure de la BD
@@ -288,6 +290,7 @@ include::{sourcedir}/jdbctemplate/Application.java[tags=selectTable,indent=0]
 * Norme « officielle »
 
 ifdef::backend-revealjs[=== !]
+
 * C’est une spécification => Nécessite une implémentation
 ** Hibernate
 ** OpenJPA
@@ -542,6 +545,7 @@ private Collection<Facture> factures;
 ----
 
 === JPA : TAD
+
 Types déclarés diff implem dans les 1-n !
 [source,java]
 @Entity

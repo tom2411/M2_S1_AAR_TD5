@@ -1,10 +1,11 @@
-== Spring
-ifndef::imagesdir[:imagesdir: images]
-ifndef::sourcedir[:sourcedir: ../../main/java]
+= Spring
+ifndef::masterdoc[]
+include::header.adoc[]
+endif::masterdoc[]
 
 Containers légers vs containers lourds
 
-=== Problématique
+== Problématique
 
 [.thumb]
 image::archi-complete.png[scaledwidth=75%]
@@ -19,7 +20,7 @@ comment on récupère la couche N-1 dans la couche N ? Un bon new ?
 - Et la gestion de la sécurité, c’est pas moi quand même ?
 
 
-=== Containers
+== Containers
 
 Ces fonctionnalités sont en général fournies par un `container`
 
@@ -32,7 +33,7 @@ Ces fonctionnalités sont en général fournies par un `container`
 
 
 
-=== Sources des données
+== Sources des données
 
 * Vous devez utiliser une DataSource, qui doit vous fournir un pool de connexions
 
@@ -46,7 +47,7 @@ Ces fonctionnalités sont en général fournies par un `container`
    ** Permet de gérer des cas plus complexes qu'avec JNDI
 
 
-=== pour JPA ?
+== pour JPA ?
 
 * Dans tous les cas, utilisation de JPA de manière identique
   ** Avec Java EE
@@ -60,7 +61,7 @@ Ces fonctionnalités sont en général fournies par un `container`
 
  
 
-=== EJB (3.X)
+== EJB (3.X)
  
 [%step]
 Les EJB 3 en 5 secondes …
@@ -68,10 +69,10 @@ Les EJB 3 en 5 secondes …
 Cf Matthieu Exbrayat
  
 
-=== Spring
- 
+== Spring
 
 Une brève histoire de Spring
+
 * Octobre 2002 Rod Johnson publie son livre «Expert One-on-One J2EE Design and Development», dans lequel il propose du code, qui va devenir plus tard le framework Spring
 * Mars 2004 Spring 1.0 sort sous licence Apache 2.0
 * 2005 Spring devient populaire, en particulier en réaction par rapport aux EJBs 2.x
@@ -81,7 +82,7 @@ Une brève histoire de Spring
 * 2013 Création de Pivotal, une joint venture entre VMWare et EMC Corporation
 
 
-=== Qu’est ce que Spring ?
+== Qu’est ce que Spring ?
 
 * Un framework Java
 * Un conteneur IoC
@@ -90,14 +91,14 @@ Une brève histoire de Spring
 * Open Source : licence Apache 2.0
 
 
-=== Qu’est-ce que Spring ?
+== Qu’est-ce que Spring ?
 
 * Spring n’est pas un serveur d’applications
    ** Il peut fonctionner sans serveur d’applications (application «stand alone», par exemple un batch)
    ** Il peut fonctionner à l’intérieur d’un serveur d’applications
 * Il peut alors utiliser les fonctionnalités du serveur, pour en simplifier ou en abstraire le fonctionnement
 
-ifdef::backend-revealjs[=== !]
+ifdef::backend-revealjs[== !]
 
 * Il peut également remplacer certaines fonctionnalités du serveur, si on juge que Spring propose une meilleure alternative
 * Généralement Spring est utilisé conjointement à un serveur d’applications léger : Tomcat ou Jetty
@@ -105,12 +106,12 @@ ifdef::backend-revealjs[=== !]
    ** Mais Spring fonctionne également parfaitement avec Weblogic, WebSphere, Glassfish, etc
 
  
-=== Spring : Architecture complète et modulaire
+== Spring : Architecture complète et modulaire
 
 [.thumb]
 image::spring-stack.png[scaledwidth=75%]
 
-=== Spring : organisation
+== Spring : organisation
 
 L’organisation de Spring est modulaire. Pourvu d’un module de base « Spring core », six modules
 d’inégales importances apparaissent (en gras les modules majeurs):
@@ -123,7 +124,7 @@ dépendance)
 * Spring ORM : Classes utilitaires permettant une intégration intéressante des différentes
 framework de mapping O/R, notamment avec Hibernate
 
-ifdef::backend-revealjs[=== !]
+ifdef::backend-revealjs[== !]
 
 * Spring DAO : Classes utilitaires facilitant à l’extrême le développement d’une couche
 d’accès aux données en jdbc pur.
@@ -138,7 +139,7 @@ connecter à des ejb, à JNDI, à JMS,… Mais aussi l’internationalisation de
 
 
 
-=== Spring : un principe fondateur
+== Spring : un principe fondateur
 
 * IoC => Inversion of Control
    ** Le «principe d’Hollywood» : Ne nous appelez pas, nous vous rappellerons
@@ -149,7 +150,7 @@ connecter à des ejb, à JNDI, à JMS,… Mais aussi l’internationalisation de
 
  
 
-=== Injection de Dépendances - DI
+== Injection de Dépendances - DI
 
 * A la base, il s’agit simplement d’injecter un objet dans un autre
 [source,java]
@@ -160,7 +161,7 @@ public class TodosServiceImpl {
 Comment initialiser `userService` ?
 
 
-=== La mauvaise méthode
+== La mauvaise méthode
 
 * La méthode interdite : le NEW, c’est mal
 [source,java]
@@ -171,7 +172,7 @@ public class TodosServiceImpl {
  
 
 
-=== Réponse classique : exemple de fabrique
+== Réponse classique : exemple de fabrique
 
 [source,java]
 ----
@@ -192,13 +193,13 @@ public class ServiceImpl {
        
  
 
-=== Principe de l’IOC
+== Principe de l’IOC
 
 * Un objet de type A dépend d’un objet type B
    ** Exemple : A possède un attribut de type B
 * Pour construire un A j’ai besoin d’un B
 
-=== IOC : casser cette dépendance ?
+== IOC : casser cette dépendance ?
 
 * Une interface I : le type A référence I, B implémente I
 * Comment instancier avec un B la référence I dans A ?
@@ -206,7 +207,7 @@ public class ServiceImpl {
    ** En appelant un setter après la construction de A
 
  
-=== 1ère méthode : go to the setter
+== 1ère méthode : go to the setter
 
 * 1ère méthode, «classique» : l’injection par setter
     ** Utilise la convention Java Bean
@@ -222,7 +223,7 @@ public class TodosServiceImpl {
 }
 ----
 
-=== 2ème méthode : utiliser le constructeur
+== 2ème méthode : utiliser le constructeur
 
 * méthode relativement populaire : utiliser le constructeur de l’objet
 
@@ -238,7 +239,7 @@ public class TodosServiceImpl {
 }
 ----
 
-=== 3ème méthode : injecte dans le champ
+== 3ème méthode : injecte dans le champ
 
 * 3ème méthode : Spring injecte directement dans le champ
    ** Méthode «magique» : en fait les champs «private» en Java peuvent être modifiés (si vous venez d’avoir un cours sur Java, on vous a menti)
@@ -252,7 +253,7 @@ public class TodosServiceImpl {
 }
 ----
 
-=== Les 3 méthodes ?
+== Les 3 méthodes ?
 
 * Injection par setter
     ** Respecte la convention JavaBeans (sans grand intérêt)
@@ -260,20 +261,21 @@ public class TodosServiceImpl {
     ** Plus clair que par constructeur
     ** Permet d’avoir des dépendances optionnelles
 
-ifdef::backend-revealjs[=== !]
+ifdef::backend-revealjs[== !]
+
 * Injection par constructeur
     ** Permet d’avoir des objets immutables
     ** Oblige à avoir toutes les dépendances correctement définies
     ** Plus concise que par setter
 
-ifdef::backend-revealjs[=== !]
+ifdef::backend-revealjs[== !]
 * Injection par champ
     ** Mêmes qualités que par constructeur
     ** Encore plus concise
     ** Mais gênant pour les tests unitaires
 
  
-=== Conseils
+== Conseils
 
 * Vous pouvez mélanger les 3 types d’injection
    ** Utilisez le plus simple en fonction de votre existant
@@ -284,7 +286,7 @@ ifdef::backend-revealjs[=== !]
    ** Il est important de mettre en place des règles à ce sujet dès le début du projet
 
  
-=== ApplicationContext
+== ApplicationContext
 
 * Un Application Context (une des implémentations de l’interface org.springframework.context.ApplicationContext) représente le conteneur Spring : il est chargé de démarrer les beans, de les injecter, de les gérer, de les détruire
 * Il en existe de plusieurs sortes : WebApplicationContext pour les applications Web par exemple
@@ -292,7 +294,7 @@ ifdef::backend-revealjs[=== !]
 
  
 
-=== Problèmes à résoudre
+== Problèmes à résoudre
 
 * Problèmes Application exemple en TP :
    ** « connections » entre EntityManager/DAO/Façade : injection de l’entityManager dans la DAO, puis de la DAO dans la façade
@@ -301,7 +303,7 @@ ifdef::backend-revealjs[=== !]
    ** Gestion de la sécurité
 
 
-=== Spring : injection de dépendances
+== Spring : injection de dépendances
 
 * Injection du DAO dans la couche Service :
 [source,java]
@@ -323,7 +325,7 @@ public class ServiceBanque implements Service {
 
  
 
-=== Spring : configuration XML
+== Spring : configuration XML
 
 * Utilise les «namespaces» XML
 ** Spring fournit une dizaine de namespaces spécialisés : beans, transactions, sécurité, etc...
@@ -338,7 +340,7 @@ public class ServiceBanque implements Service {
 
  
 
-=== Spring : configuration XML
+== Spring : configuration XML
 
 [source,xml]
 ----
@@ -360,7 +362,7 @@ http://www.springframework.org/schema/beans/spring-beans-3.1.xsd" >
 </beans>
 ----
 
-=== Spring : injection de dépendances
+== Spring : injection de dépendances
 
 * Possibilité d’injecter les facades (en mock) dans le business delegate
 [source,xml]
@@ -383,7 +385,7 @@ http://www.springframework.org/schema/beans/spring-beans-3.1.xsd" >
 ----
  
 
-=== Spring : par annotations
+== Spring : par annotations
 [source,java]
 ----
 @Component
@@ -400,7 +402,7 @@ public class TodosServiceImpl implements TodosService {
 }
 ----
 
-=== Spring : par annotations
+== Spring : par annotations
 
 * Il faut préciser dans le fichier XML que l’on veut utiliser les annotations
 [source,xml]
@@ -413,13 +415,13 @@ public class TodosServiceImpl implements TodosService {
 
  
 
-=== Spring : recherche des deps
+== Spring : recherche des deps
 
 * Le plus évident : par nom
    ** Pour injecter un Bean nommé «userService», Spring recherche le Bean qui a cet ID (ref)
    ** C’était l’exemple de configuration XML
 
-ifdef::backend-revealjs[=== !]
+ifdef::backend-revealjs[== !]
 * Le plus concis : par type
    ** On ne nomme pas le Bean à injecter : Spring recherche alors son Type
    ** Comprendre type au sens Java : Spring recherche alors quel Bean est de ce type là (même classe, ou bien implémentant cette interface)
@@ -430,7 +432,7 @@ ifdef::backend-revealjs[=== !]
 
  
 
-=== Spring : 3 modes de configuration
+== Spring : 3 modes de configuration
 
 * XML : méthode «classique», très souple et très puissante
    ** Essentielle à connaître
@@ -439,7 +441,7 @@ ifdef::backend-revealjs[=== !]
    ** Plus « rapide » à utiliser
    ** Plus simple : ne convient qu’à de la configuration «métier»
 
-ifdef::backend-revealjs[=== !]
+ifdef::backend-revealjs[== !]
 * Java : depuis Spring 3.0
    ** Permet de coder en Java quelque chose de similaire à la configuration XML
    ** Plus puissant (c’est du code, on peut faire ce qu’on veut)
@@ -447,12 +449,12 @@ ifdef::backend-revealjs[=== !]
    ** Moins répandu
 
  
-=== Spring : nommage
+== Spring : nommage
 
 * Tout Bean est référencé dans le conteneur Spring avec un nom unique
    ** Si deux Beans ont le même nom, vous aurez une Exception au démarrage
 
-ifdef::backend-revealjs[=== !]
+ifdef::backend-revealjs[== !]
 * Ce nom est libre, mais par convention on utilise généralement le nom de la classe (ou de l’interface implémentée), en CamelCase, en commençant par une minuscule
    ** «dataSource», «monServiceMetier», «entityManager»
    ** L’homogénéité du nommage dans l’application est important
@@ -463,7 +465,7 @@ ifdef::backend-revealjs[=== !]
       *** Mais cela interdisait certains caractères («/») ainsi que de donner deux noms différents au même Bean (il fallait utiliser un alias)
 
  
-=== Spring : nommage avec annotations
+== Spring : nommage avec annotations
 
 * Configuration par défaut : «todosServiceImpl»
 [source,java]
@@ -480,7 +482,7 @@ public class TodosServiceImpl {
 }
  
 
-=== Spring : annotations spécifiques
+== Spring : annotations spécifiques
 
 * Pour les couches standards, remplace @Component
 
@@ -492,7 +494,7 @@ public class TodosServiceImpl {
 
  
 
-=== Scope des beans Spring
+== Scope des beans Spring
 
 * singleton : Scopes a single bean definition to a single object instance
 per Spring IoC container.
@@ -510,7 +512,7 @@ of a single bean definition. [Only valid web-aware Spring ApplicationContext]
 [Only valid web-aware Spring ApplicationContext]
  
 
-=== Les Scopes en VF
+== Les Scopes en VF
 
 * Par défaut, les Beans Spring sont dits être des «singletons»
   ** Ils ne sont instanciés qu’une seule fois par contexte Spring
@@ -520,7 +522,7 @@ of a single bean definition. [Only valid web-aware Spring ApplicationContext]
   ** Permet de gagner en performance : on ne crée pas un grand nombre d’instances d’objets pour rien
 
 
-=== Les Scopes en VF…
+== Les Scopes en VF…
 
 * Le fait d’avoir des singletons a un impact en environnement multi-threadé
   ** Les variables de classe sont partagées entre les threads
@@ -534,7 +536,7 @@ public class TodosServiceImpl implements TodosService {
 }
  
 
-=== Les Scopes en VF…
+== Les Scopes en VF…
 
 * Que faire si vous avez besoin de plusieurs instances du même Bean ?
 ** Exemple très fréquent : il contient des données de l’utilisateur
@@ -548,7 +550,7 @@ public class TodosServiceImpl implements TodosService {
 </bean>
  
 
-=== It’s alive !
+== It’s alive !
 
 * La vie des Beans est gérée par Spring
     ** C’est Spring qui crée les Beans
@@ -561,7 +563,7 @@ public class TodosServiceImpl implements TodosService {
 
  
 
-=== Etape 1 : lecture de la config
+== Etape 1 : lecture de la config
 
 * Au démarrage, Spring lit sa configuration
    ** Dans un fichier XML
@@ -572,7 +574,7 @@ public class TodosServiceImpl implements TodosService {
    ** Il est donc impossible d’avoir un comportement différent entre une configuration XML et une configuration par annotation (= en cas de problème, c’est votre configuration qui est mauvaise)
 
 
-=== BeanFactoryPostProcessor
+== BeanFactoryPostProcessor
 
 * Spring propose à ce moment un premier point d’extension : le BeanFactoryPostProcessor
   ** Il permet de modifier la configuration des Beans
@@ -581,7 +583,7 @@ public class TodosServiceImpl implements TodosService {
   ** Très souvent utilisé, le fichier plat pouvant être modifié facilement par des administrateurs ou des scripts
 
 
-=== Exemple
+== Exemple
 
 [source,xml]
 ----
@@ -598,7 +600,7 @@ public class TodosServiceImpl implements TodosService {
 </bean>
 ----
 
-=== Etape 2 : instantiation et injection
+== Etape 2 : instantiation et injection
 
 * Une fois la configuration traitée par Spring, celui-ci va créer les Beans (scope Singleton) qui ont été définis
     ** Il crée les Beans en utilisant l’API Reflection de Java
@@ -607,7 +609,7 @@ public class TodosServiceImpl implements TodosService {
         *** Sauf pour l’injection de dépendance par constructeur
         *** Attention aux dépendances cycliques dans ce cas (mais elles sont généralement la preuve d’une mauvaise architecture)
 
-ifdef::backend-revealjs[=== !]
+ifdef::backend-revealjs[== !]
 
 * C’est au moment de l’injection que Spring crée des «proxy» sur les objets
    ** Si nécessaire, Spring génère une implémentation «enrichie» des objets
@@ -617,7 +619,7 @@ ifdef::backend-revealjs[=== !]
 
  
 
-=== Etape 3 : init des beans
+== Etape 3 : init des beans
 
 * Une fois tous les Beans créés et injectés par Spring, un nouveau point d’extension est disponible
     ** Il ne faut pas utiliser les constructeurs des objets pour faire des choses complexes, car les Beans ne sont pas encore prêts (l’injection de dépendance n’est pas encore faite)
@@ -626,14 +628,14 @@ ifdef::backend-revealjs[=== !]
    ** Une configuration XML (attribut «init-method»)
    ** Une interface à implémenter (InitializingBean)
 
-ifdef::backend-revealjs[=== !]
+ifdef::backend-revealjs[== !]
 
 * La manière recommandée est d’utiliser l’annotation
 * Elle est standardisée (JSR 250) : aucune dépendance sur Spring !
     ** Elle est simple et peu intrusive
 
  
-=== Exemple
+== Exemple
 
 [source,java]
 ----
@@ -651,7 +653,7 @@ public class TodosServiceImpl {
 
  
 
-=== Etape 4 : Run
+== Etape 4 : Run
 
 * Une fois les Beans instanciés, injectés et initialisés le conteneur Spring est prêt à l’emploi
   ** Il devient accessible (on peut lui demander un Bean via l’API)
@@ -661,7 +663,7 @@ public class TodosServiceImpl {
 
  
 
-=== Etape 5 : Destruction (option)
+== Etape 5 : Destruction (option)
 
 [source,java]
 ----
@@ -679,13 +681,13 @@ WARNING: pour un Prototype cette méthode ne sera pas appelée («fire and forge
 
  
 
-=== Cas particulier
+== Cas particulier
 
 * Que faire si vos beans sont lents au démarrage ?
    ** Un exemple possible : l’initialisation d’un cache
 * On ne va pas vouloir suivre le cycle de vie classique : on veut avoir des Beans uniquement instanciés à la demande : c’est le «lazy loading»
 
-ifdef::backend-revealjs[=== !]
+ifdef::backend-revealjs[== !]
 * C’est généralement une fausse bonne idée :
    ** Le premier utilisateur à utiliser cet objet va alors subir le chargement
    ** Il y a toujours un risque de mauvaise configuration : mieux vaut être sûr du bon lancement de ses Beans au démarrage de l’application
@@ -696,14 +698,14 @@ ifdef::backend-revealjs[=== !]
 </bean>
  
 
-=== Démarrage de Spring
+== Démarrage de Spring
 
 * Pour démarrer Spring, il faut créer une instance de l’interface ApplicationContext
    ** Plusieurs implémentations existent
    ** Elles sont spécialisées pour certains environnements : application Web, test unitaire, etc...
    ** Elles sont toutes sur le même principe : il faut charger la configuration Spring (habituellement, charger le fichier de configuration XML)
 
-ifdef::backend-revealjs[=== !]
+ifdef::backend-revealjs[== !]
 
 * La manière la plus simple :
 [source,java]
@@ -711,7 +713,7 @@ ApplicationContext ctx =
     new ClassPathXmlApplicationContext("application-context.xml");
  
 
-=== Astuces config
+== Astuces config
 
 * Pour lire le fichier dans le système de fichier :
 [source,java]
@@ -729,7 +731,7 @@ ApplicationContext ctx =
     new FileSystemXmlApplicationContext("/home/application/*.xml");
  
 
-=== Démarrage Web
+== Démarrage Web
 
 * Spring est lancé via un listener dans le fichier web.xml
 [source,xml]
@@ -748,7 +750,7 @@ CAUTION: cette configuration lance uniquement Spring IoC, sans Spring MVC
 
  
 
-=== Arrêt
+== Arrêt
 
 * L’application peut parfaitement être arrêtée «normalement» ou crasher...
 * Si vous voulez explicitement arrêter Spring :
@@ -761,7 +763,7 @@ applicationContext.close();
 
  
 
-=== Spring injection
+== Spring injection
 
 * Des types simples (eg String, int, …)
 
@@ -781,7 +783,7 @@ applicationContext.close();
 
  
 
-=== Spring injection : innerBean
+== Spring injection : innerBean
 
 * Exemple avec Hibernate :
 [source,xml]
@@ -804,13 +806,13 @@ applicationContext.close();
 </bean>
 ----
 
-=== Spring : Exemple complet
+== Spring : Exemple complet
 
 Architecture générale de l’application Banque
 
  
 
-=== Spring : exemple
+== Spring : exemple
 
     * 1 : config accès DataSource – persistance.xml 
 [source,xml]
@@ -828,7 +830,7 @@ Architecture générale de l’application Banque
 ----
  
 
-=== Spring : exemple
+== Spring : exemple
 
 * 2 : config accès DataSource – spring-config.xml
 [source,xml]
@@ -844,7 +846,7 @@ Architecture générale de l’application Banque
 ----
  
 
-=== Spring : exemple
+== Spring : exemple
 
 * 3 : injection dans la DAO : spring-config.xml
 [source,xml]
@@ -862,7 +864,7 @@ Architecture générale de l’application Banque
 ----
  
 
-=== Spring : exemple
+== Spring : exemple
 
 * 3 : injection dans la DAO : Banque1.java
 [source,java]
@@ -880,7 +882,7 @@ public class Banque1 implements IBanque {
 ----
  
 
-=== Spring : exemple
+== Spring : exemple
 
 * 4 : injection dans Service : spring-config.xml
 [source,xml]
@@ -895,7 +897,7 @@ public class Banque1 implements IBanque {
 ----
  
 
-=== Spring : exemple
+== Spring : exemple
 
 * 4 : injection dans Service : Service1.java
 [source,java]
@@ -913,7 +915,7 @@ public class Service1 implements IService {
     }
 ----
 
-=== Spring : exemple
+== Spring : exemple
 
 * 5 : Gestion des transactions : spring-config.xml
 [source,xml]
@@ -928,25 +930,25 @@ public class Service1 implements IService {
 ----
  
 
-=== Spring : exemple
+== Spring : exemple
 
 * La même en FULL annotations
 
  
 
-=== Une configuration typique
+== Une configuration typique
 
 * Des fichiers «d’infrastructure»
    ** Plusieurs fichiers, découpés en fonction de leur périmètre fonctionnel
    ** Exemple : un fichier pour configurer la sécurité, un fichier pour configurer la base de données
-ifdef::backend-revealjs[=== !]
+ifdef::backend-revealjs[== !]
 * Des annotations dans les Beans de la couche «métier»
    ** Les développeurs gagnent ainsi en temps de développement
    ** Facilite le refactoring
    ** Recommandation : avoir un IDE qui «comprend» cette configuration (IntelliJ)
 
  
-=== Une configuration typique
+== Une configuration typique
 
 * Généralement, ces variables injectées sont des paramètres, qui dépendent de l’environnement
    ** Elles se trouvent dans la configuration «d’infrastructure»
@@ -964,7 +966,7 @@ ifdef::backend-revealjs[=== !]
 </bean>
 ----
 
-=== Bonnes pratiques
+== Bonnes pratiques
 
 * La configuration métier est réalisée à l’aide d’annotations
    ** Elle ne change pas, quel que soit l’environnement
@@ -973,7 +975,7 @@ ifdef::backend-revealjs[=== !]
 
  
 
-=== Bonnes pratiques
+== Bonnes pratiques
 
 * La configuration d’infrastructure est stockée dans plusieurs fichiers XML :
    ** Tous sont dans le même répertoire : classpath:META-INF/spring/*.xml
@@ -983,7 +985,7 @@ ifdef::backend-revealjs[=== !]
 
  
 
-=== Spring : les transactions
+== Spring : les transactions
 
 * Spring propose une couche d’abstraction
    ** Gère les transactions JDBC, Hibernate, JTA etc... de manière homogène
@@ -994,7 +996,7 @@ ifdef::backend-revealjs[=== !]
 
  
 
-=== Les transactions version simple
+== Les transactions version simple
 
 * Configurer un gestionnaire de transaction
 [source,xml]
@@ -1014,7 +1016,7 @@ public void uneMethodeMetier() {
 
 
 
-=== Transactions
+== Transactions
 
 * Le gestionnaire de transaction est une classe fournie par Spring
    ** Il fait partie de l’infrastructure
@@ -1029,7 +1031,7 @@ Spring peut retrouver automatiquement le gestionnaire de transactions de ce serv
 <tx:jta-transaction-manager/>
  
 
-=== @Transactional
+== @Transactional
 
 * L’annotation @Transactional peut être mise sur une classe (toutes les méthodes publiques sont transactionnelles) ou sur une méthode
 * Cette annotation peut avoir un certain nombre de paramètres : Isolation, Propagation, Timeout, readOnly…
@@ -1044,18 +1046,18 @@ public class TodoListsServiceImpl implements TodoListsService {
 }
  
 
-=== Transaction read-only
+== Transaction read-only
 
 * On peut marquer une transaction comme étant «read-only»
     ** On indique qu’elle ne va pas modifier de données en base
     ** En lecture, il est toujours important d’utiliser des transactions, ne serait-ce que pour les performances
-ifdef::backend-revealjs[=== !]
+ifdef::backend-revealjs[== !]
 * Cet attribut est important
     ** Hibernate va le comprendre, il ne va alors plus vérifier s’il doit impacter des modifications sur les objets en base : meilleures performances
     ** Certains drivers JDBC vont le comprendre (Oracle ne vous autorisera plus qu’à faire des «SELECT») : meilleure qualité
 
 
-=== Transactions
+== Transactions
 
 * L’utilisation des transactions est essentielle, elle vous garantie la qualité des données
 et de bonnes performances
@@ -1067,7 +1069,7 @@ et de bonnes performances
 
  
 
-=== Transactions
+== Transactions
 
 * Exemple de code « propre » pour la couche de service :
 [source,java]
@@ -1080,7 +1082,7 @@ public Collection<Client> getAllClients() {
 @Transactional(rollbackFor=ClientNotFound.class)
 public void updateClient(Client client) throws ClientNotFound {
    Client c = clientDao.findOne(client.getId());
-   if (c==null) throw new ClientNotFound();
+   if (c=null) throw new ClientNotFound();
    c.setAdresse(client.getAdresse());
    c.setNom(client.getNom());
    c.setPrenom(client.getPrenom());
@@ -1088,7 +1090,7 @@ public void updateClient(Client client) throws ClientNotFound {
 ----
  
 
-=== Profils
+== Profils
 
 * Les profils sont une nouveauté Spring 3.1
   ** Ils permettent de simplifier le découpage en fonction de l’environnement
@@ -1101,7 +1103,7 @@ public void updateClient(Client client) throws ClientNotFound {
 </beans>
 
 
-=== Profils
+== Profils
 
 * Pour choisir un profil au démarrage
    ** Utiliser une variable d’environnement :
@@ -1140,7 +1142,7 @@ méthodes existantes
 ** Est largement suffisant pour des besoins "normaux", ce qui fait que la très
 grande majorité des utilisateurs de Spring utilise Spring AOP
 
-ifdef::backend-revealjs[=== !]
+ifdef::backend-revealjs[== !]
 * AspectJ est une technologie nettement plus complète et complexe
 ** Repose sur une modification du bytecode des classes Java
 ** Permet de faire des choses nettement plus compliquées : injecter des Beans
@@ -1148,7 +1150,7 @@ Spring dans des classes standards, par exemple
 ** Est plus performant en production (mais cela a un impact mineur dans la
 réalité : à comparer avec un accès base de données)
 
-ifdef::backend-revealjs[=== !]
+ifdef::backend-revealjs[== !]
 * Spring AOP utilise le même "langage" que AspectJ, ce qui fait que
 l'on peut facilement migrer de Spring AOP vers AspectJ
 * Nous allons donc nous concentrer sur Spring AOP
@@ -1168,6 +1170,7 @@ l'on peut facilement migrer de Spring AOP vers AspectJ
 tests et la souplesse de l'application)
 
 ifdef::backend-revealjs[=== !]
+
 * Si vos classes n'implémentent pas d'interface
 ** Spring AOP va utiliser CGLIB pour générer le proxy
 ** CGLIB est une librairie Open Source qui permet de générer des
@@ -1223,7 +1226,7 @@ code avant, après, autour de la méthode...
 Exception, le Join point ne sera pas appelé
 ** After returning advice : s’exécute après le Join point, si celui-ci s’
 est bien exécuté (s’il n’y a pas eu d'Exception)
-ifdef::backend-revealjs[=== !]
+ifdef::backend-revealjs[== !]
 ** After throwing advice : s’exécute si une Exception a été lancée
 pendant l’exécution du Join point
 ** After advice : s’exécute après le Join point, qu’il y ait eu une
@@ -1327,7 +1330,9 @@ nombreux autres objets
 ** Ne fonctionne qu’avec les Beans Spring
 ** Ne s’applique qu’aux méthodes publiques
 ** Ne fonctionne pas à l’intérieur d’un même Bean
+
 ifdef::backend-revealjs[=== !]
+
 * Cela est dû à l’utilisation des Proxys (on «passe» par une
 interface Java)
 * Le 3 ème point (une méthode d’un Bean qui appelle
@@ -1341,7 +1346,9 @@ les projets Spring
 Spring
 ** Fiable
 ** Très puissante
+
 ifdef::backend-revealjs[=== !]
+
 * Elle permet de rajouter dynamiquement du code à des
 méthodes, de manière transverse et non intrusive
 * Bien comprendre son fonctionnement est essentiel
@@ -1642,6 +1649,8 @@ transaction supportent les transactions XA
 ** Avec Spring, vous pouvez configurer un gestionnaire de transaction XA
 externe : Atomikos, Bitronix
 
+ifdef::backend-revealjs[=== !]
+
 *  Avec Spring, c’est juste une configuration différente de l’
 infrastructure
 ** Aucun changement dans le code !
@@ -1664,9 +1673,11 @@ session Hibernate)
 les pages Web
 **  Règle les problèmes de «lazy loading» avec Hibernate
 
+ifdef::backend-revealjs[=== !]
+
 *  mais parfois des pb de performances
 **  Il a tendance à laisser les transactions ouvertes trop longtemps
-**  On arrive à terme à une requête HTTP == une transaction, et donc à
+**  On arrive à terme à une requête HTTP = une transaction, et donc à
 une connexion en base de données. Difficile alors de monter en
 charge !
 
@@ -1700,15 +1711,21 @@ basses (repository/DAO)
 
 
 === Les composants de Spring MVC
+
 *  Le Controller
 ** Un Bean Spring, annoté @Controller
 ** Supporte donc l’injection de dépendance : c’est ainsi qu’il accède à la
 couche Service
 ** C’est lui qui valide la requête, remplit le modèle, et redirige vers la bonne vue
+
+ifdef::backend-revealjs[=== !]
+
 *  La vue
 ** C’est typiquement une JSP qui va être chargée d’afficher le modèle
 ** Spring MVC n’est pas limité à la technologie JSP, mais c’est elle qui est le
 plus couramment utilisée
+
+ifdef::backend-revealjs[=== !]
 
 *  Le modèle
 ** Un Java Bean ou un ensemble de Java Beans (Collection), provenant de la
@@ -1720,6 +1737,7 @@ une entité Hibernate, ou un ensemble d’entités Hibernate
 
 
 === Pré-requis : lancer Spring
+
 *  Avant de configurer et lancer Spring MVC, il faut configurer
 et lancer Spring
 **  Il s’agit de configurer un listener de Servlet, dans le fichier web.xml
@@ -1727,6 +1745,9 @@ et lancer Spring
 paramètre, et se charger de lancer le contexte Spring
 **  Comme nous l’avons vu dans les chapitres précédents, Spring va
 alors trouver la Data Source, lancer JPA, gérer les transactions...
+
+ifdef::backend-revealjs[== !]
+
 Nous aurons donc ainsi une application pleinement fonctionnelle
 [source,xml]
 <context-param>
@@ -1894,6 +1915,7 @@ public User formBackingObject() {
 
 
 === @ModelAttribute sur un paramètre de méthode
+
 *  Sur un paramètre d’une méthode annotée
 @RequestMapping, l’annotation @ModelAttribute va
 permettre de «binder» les paramètres de la requête HTTP
@@ -1978,6 +2000,8 @@ un standard, pour valider les formulaires HTML
 **  Dans ce cadre, on aura certainement des Java Beans spécifiques
 pour gérer les formulaires, comme les FormBeans de Struts
 
+ifdef::backend-revealjs[== !]
+
 *  Elle permet également de valider automatiquement les objets
 de domaines que l’on afficherait directement dans la page
 **  Cela reprend les principes du «DDD» et d’objets de domaine «forts» :
@@ -2009,6 +2033,7 @@ très complexes
 
 
 === Qu’est-ce que REST ?
+
 *  REST est un style d’architecture distribuée
 
 ** De nombreux frameworks facilitent sa mise en oeuvre
@@ -2019,6 +2044,9 @@ pas être limité à ce style d’architecture
 ressources, adressables (URL), sur lesquelles il est possible d’agir
 à travers l’interface qu’est HTTP (via ses méthodes GET, POST,
 PUT, DELETE, …)
+
+ifdef::backend-revealjs[== !]
+
 *  Cette architecture est très bien adaptée au Web
 ** Elle prône une approche stateless
 ** Elle tire pleinement partie de HTTP (permet d’utiliser le cache des
@@ -2035,6 +2063,8 @@ navigateurs correctement par exemple)
 *  Le terme API Web est moins contraignant qu’API REST
 ** Désigne une API pouvant s’inspirer des principes de REST
 ** N’oblige pas à honorer l’ensemble des contraintes de REST
+
+ifdef::backend-revealjs[== !]
 
 *  Une API Web pourra donc se conformer plus ou moins au style d’
 architeture REST
@@ -2095,6 +2125,8 @@ les verbes pour agir sur les ressources
 ** PUT pour créer une ressource
 ** DELETE pour effacer une ressource
 
+ifdef::backend-revealjs[== !]
+
 *  En HTML, nous n’avons accès qu’aux verbes GET et POST
 **  Spring MVC simule PUT et DELETE en utilisant le verbe POST avec
 un paramètre caché dans les formulaires (grâce au filtre
@@ -2114,7 +2146,10 @@ HiddenHttpMethodFilter)
 
 *  Spring MVC propose une intégration avec Jackson (http://jackson.codehaus.org/), qui permet de transformer des
 objets Java en JSON (et inversement)
-**  Jackson transformera automatiquement au format JSON les entités
+
+ifdef::backend-revealjs[== !]
+
+*  Jackson transformera automatiquement au format JSON les entités
 ou collections d’entités retournées par les Controllers
 [source,java]
 @RequestMapping(value = "/api/lists.json", method = RequestMethod.GET)
@@ -2181,6 +2216,8 @@ demandera de nouveau, il renverra le ETag, et si elle n’a pas changé
 le serveur renverra une réponse HTTP 304 Not Modified
 **  Cela permet donc de gagner en trafic réseau
 
+ifdef::backend-revealjs[== !]
+
 *  Spring propose le filtre ShallowEtagHeaderFilter pour
 automatiquement gérer les ETags des ressources REST
 **  Attention : pour fonctionner, la requête doit quand même
@@ -2213,21 +2250,29 @@ des appels Ajax vers une API Spring MVC
 **  Les objets échangés sont au format JSON
 **  Les URLs “propres” sont faciles à utiliser avec JQuery
 **  L’état est bien géré côté client (nous sommes stateless côté serveur)
+
+ifdef::backend-revealjs[== !]
+
 [source,js]
 $.get("/api/accounts/123" , { } ,
 function (account) {
-$( '#container' ).append( '<div>' + account.login + ' - <b>' +
-account.firstName + ' ' + account.userLastName + '</b></div>' );
-},
-"json");
+$( '#container' ).append( '<div>'+
+    account.login + ' - <b>' +
+    account.firstName + ' ' +
+    account.userLastName +
+    '</b></div>' );
+}, "json");
 
 
 
 === Conclusion sur Spring MVC pour les API Web
+
 *  Spring MVC permet de simplifier la réalisation d’API Web
 **  Support (partiel) de REST : URLs, verbes HTTP, gestion du ContentType, gestion des ETags...
 **  Possibilité de conserver Spring MVC pour réaliser des pages Web
 plus classiques, en particulier avec un état géré coté serveur
+
+ifdef::backend-revealjs[== !]
 
 *  C’est une excellente manière de réaliser des applications
 Web «riches»
@@ -2284,6 +2329,8 @@ objets, etc...
 ***  Généralement, ces droits sont stockés dans un serveur LDAP ou
 une base de données
 
+ifdef::backend-revealjs[== !]
+
 *  Spring Security permet de traiter ces deux concepts de
 manière indépendante : par exemple l’authentification en
 LDAP et les autorisations en base de données
@@ -2319,9 +2366,11 @@ déconnexion de l’utilisateur
 **  Ils vont gérer les cas d’erreurs et rediriger
 l’utilisateur vers les pages d’erreurs
 
-*  Nous utilisons ici la configuration fournie par défaut
-**  Elle fonctionne parfaitement pour un site Web normal
-**  Elle est entièrement paramétrable si besoin
+ifdef::backend-revealjs[== !]
+
+*  La configuration fournie par défaut :
+**  fonctionne parfaitement pour un site Web normal
+**  est entièrement paramétrable si besoin
 
 
 === Configuration minimale
@@ -2353,6 +2402,9 @@ nécessaires pour accéder à une
 URL donnée
 *  Ils se configurent avec des
 patterns «Ant»
+
+ifdef::backend-revealjs[== !]
+
 *  Ils sont ordonnés : le premier filtre à
 intercepter la requête est celui qui va la traiter
 *  Il faut donc les ordonner du plus spécialisé au moins spécialisé
@@ -2371,6 +2423,8 @@ page de login
 **  Il détermine également l’URL qui va
 traiter l’authentification, la page d’erreur,
 etc...
+
+ifdef::backend-revealjs[== !]
 
 *  La page de login va alors pointer
 vers l’URL de traitement de
@@ -2414,6 +2468,8 @@ authorities-by-username-query= "..."/>
 </authentication-provider>
 </authentication-manager>
 
+ifdef::backend-revealjs[== !]
+
 *  Les requêtes par défaut sont :
 
 `SELECT username, password, enabled FROM users WHERE username = ?`
@@ -2449,6 +2505,8 @@ Servlet fonctionnent donc
 **  Les Tag Lib ou frameworks (Struts) utilisant ces méthodes
 fonctionnent sans modification
 
+ifdef::backend-revealjs[== !]
+
 *  Spring Security propose également sa propre Tag Lib, avec
 une API plus élaborée :
 <sec:authorize access="hasRole('ROLE_ADMIN')">
@@ -2461,6 +2519,7 @@ Seule une personne pouvant voir l'URL "/admin" peut voir ce texte !
 
 
 === Sécurisation de méthodes Java
+
 *  Spring Security peut également sécuriser l’accès à des
 méthodes Java
 **  Il s’agit d’un nouvel Aspect (cf. le chapitre
@@ -2473,10 +2532,10 @@ spécifique à Spring Security
 standardisée dans la JSR 250
 <global-method-security secured-annotations= "enabled" />
 
+[source,java]
 @Secured ("ROLE_ADMIN" )
 public void uneMethodeSecurisee() {
-// code ne pouvant être exécuté que par un
-admin
+// code ne pouvant être exécuté que par un admin
 }
 
 
@@ -2486,6 +2545,8 @@ admin
 **  C’est une fonctionnalité courante des sites Web, qui permet à un
 utilisateur de ne plus renseigner son mot de passe pendant une
 période donnée
+
+ifdef::backend-revealjs[== !]
 
 *  Il y a deux implémentations principales
 **  Une basée sur un hash, simple à mettre en place, mais qui pose un
@@ -2506,6 +2567,8 @@ répandu en entreprise
 **  Il permet de sécuriser des applications Web, en particulier en
 donnant des règles d’accès aux URLs
 **  Il peut également sécuriser des Beans Spring grâce à un Aspect
+
+ifdef::backend-revealjs[== !]
 
 *  Sa configuration de base est relativement simple, avec l’
 utilisation d’un namespace spécifique
