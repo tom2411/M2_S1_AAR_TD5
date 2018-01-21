@@ -1,6 +1,6 @@
 = Introduction
 ifndef::masterdoc[]
-include::header.adoc[]
+include::header.include[]
 endif::masterdoc[]
 
 == Le cours
@@ -64,7 +64,7 @@ JDK 1.1 : Sérialisation des objets, JDBC
 JSR 12, JDO 1.0, 2002
 
 JSR 243, JDO 2.0, 2006
-
+n
 JSR 222, JAXB 2.0, 2006
 
 |EJB 1.0, 1998, gestion des transactions distribuées

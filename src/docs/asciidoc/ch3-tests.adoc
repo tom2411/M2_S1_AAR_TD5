@@ -1,6 +1,6 @@
 = Tests en archi n-tiers
 ifndef::masterdoc[]
-include::header.adoc[]
+include::header.include[]
 endif::masterdoc[]
 
 Le bon testeur, il teste

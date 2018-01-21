@@ -5,8 +5,8 @@
     <groupId>fr.univ.orleans.informatique.cours</groupId>
     <artifactId>coursAAR</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>cours d'AAR</name>
-    <description>Les cours/démos du cours d'AAR - master 2 MIGAE/INFO - Université d'Orléans</description>
+    <name>module AAR</name>
+    <description>Les cours/démos/tps du module AAR - master 2 MIGAE/INFO - Université d'Orléans</description>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -142,6 +142,7 @@
                             <backend>revealjs</backend>
                             <templateDir>${project.build.directory}/asciidoctor-reveal.js-${asciidoctor-revealjs.version}/templates/slim</templateDir>
                             <sourceHighlighter>coderay</sourceHighlighter>
+                            <sourceDocumentName></sourceDocumentName>
                             <resources>
                                 <resource>
                                     <!-- (Mandatory) Directory to copy from. Paths are relative to maven's ${baseDir} -->
@@ -175,18 +176,17 @@
                         </goals>
                         <configuration>
                             <backend>pdf</backend>
-                            <!-- Since 1.5.0-alpha.9 PDF back-end can use 'rouge' as well as 'coderay'
-                            for source highlighting -->
-                            <!-- Due to a known issue on windows, it is recommended to use 'coderay' until an new version of 'rouge' is released.
-                                    see discussions: https://github.com/asciidoctor/asciidoctor-maven-examples/pull/58
-                                                     https://github.com/asciidoctor/asciidoctorj-pdf/issues/3
-                                                     https://github.com/jneen/rouge/issues/661
-                            -->
                             <sourceHighlighter>coderay</sourceHighlighter>
+                            <sourceDirectory>src/docs/asciidoc</sourceDirectory>
+                            <requires>
+                                <require>asciidoctor-diagram</require>
+                            </requires>
                             <attributes>
                                 <icons>font</icons>
+<!--
                                 <pagenums/>
                                 <toc/>
+-->
                                 <idprefix/>
                                 <idseparator>-</idseparator>
                                 <imagesdir>${project.build.directory}/generated-docs/images</imagesdir>

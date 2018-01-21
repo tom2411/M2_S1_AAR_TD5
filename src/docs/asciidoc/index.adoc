@@ -1,4 +1,5 @@
 = cours d'AAR : Architectures Applicatives Réparties
+include::header.include[]
 :doctype: book
 :toc: left
 :toc-title: Sommaire
@@ -6,7 +7,6 @@
 :sectlinks:
 :sectnums:
 :masterdoc: // chapters are embedded in a master document
-include::header.adoc[]
 
 
 // chapters
@@ -15,9 +15,13 @@ include::header.adoc[]
 
 include::ch0-intro.adoc[]
 
-include::chapitre1.adoc[]
+include::ch1-orm.adoc[]
 
-include::chapitre2.adoc[]
+include::ch2-spring.adoc[]
+
+include::ch3-tests.adoc[]
+
+include::../tp/tp1.adoc[]
 
 :leveloffset: -1
 
