@@ -2,8 +2,8 @@
 Frédéric Moal <frederic.moal@univ-orleans.fr>
 v1.0, 2017-10-26: une première version
 ifndef::imagesdir[:imagesdir: ../images]
-ifndef::sourcedir[:sourcedir: ../../main/java]
-ifndef::resourcesdir[:resourcesdir: ../../main/resources]
+ifndef::sourcedir[:sourcedir: ../../java]
+ifndef::resourcesdir[:resourcesdir: ../../resources]
 
 
 == Gestion de la persistance hors conteneur

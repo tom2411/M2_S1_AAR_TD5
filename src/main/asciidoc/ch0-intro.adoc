@@ -1,6 +1,6 @@
 = Introduction
 ifndef::masterdoc[]
-include::header.include[]
+include::header.adoc[]
 endif::masterdoc[]
 
 == Le cours

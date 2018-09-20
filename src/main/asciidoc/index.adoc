@@ -1,5 +1,5 @@
 = cours d'AAR : Architectures Applicatives Réparties
-include::header.include[]
+include::header.adoc[]
 :doctype: book
 :toc: left
 :toc-title: Sommaire
@@ -21,7 +21,15 @@ include::ch2-spring.adoc[]
 
 include::ch3-tests.adoc[]
 
-include::../tp/tp1.adoc[]
-
 :leveloffset: -1
 
+// include exercises to pdf only
+
+ifdef::backend-pdf[]
+== Exercices
+:leveloffset: +2
+include::tp/tp1.adoc[]
+include::tp/tp2.adoc[]
+include::tp/tp3.adoc[]
+:leveloffset: -2
+endif::[]

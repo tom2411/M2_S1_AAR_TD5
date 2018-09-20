@@ -1,6 +1,6 @@
 = ORM : gestion de la persitance des données
 ifndef::masterdoc[]
-include::header.include[]
+include::header.adoc[]
 endif::masterdoc[]
 
 
@@ -8,7 +8,7 @@ endif::masterdoc[]
 
 Il y a des différences fondamentales entre un tuple dans une table et un objet d’une classe
 
-* Pas d'héritage ou de polsymorphisme en base de données
+* Pas d'héritage ou de polymorphisme en base de données
 * La gestion des associations est différente (one-to-many et many-to-many)
 * De nombreux types de données sont différents (par exemple il y a de nombreuses façons de stocker une String en base de données)
 * Les contraintes de validation ne sont pas gérées de la même manière

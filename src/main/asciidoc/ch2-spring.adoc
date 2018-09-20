@@ -1,6 +1,6 @@
 = Spring
 ifndef::masterdoc[]
-include::header.include[]
+include::header.adoc[]
 endif::masterdoc[]
 
 Containers légers vs containers lourds
