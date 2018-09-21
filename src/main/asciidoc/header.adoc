@@ -2,7 +2,7 @@ Frédéric Moal <frederic.moal@univ-orleans.fr>
 2017-11-17
 :revnumber: {project-version}
 ifndef::imagesdir[:imagesdir: images]
-ifndef::sourcedir[:sourcedir: ../../java]
+ifndef::sourcedir[:sourcedir: ../java]
 ifndef::resourcesdir[:resourcesdir: ../../resources]
 // reveal options ; cf https://github.com/asciidoctor/asciidoctor-reveal.js/
 //:revealjs_theme: white
