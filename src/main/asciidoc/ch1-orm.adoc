@@ -1,6 +1,6 @@
-= ORM : gestion de la persitance des données
+= Gestion de la persitance des données
 ifndef::masterdoc[]
-include::header.adoc[]
+include::_header.adoc[]
 endif::masterdoc[]
 
 
@@ -10,11 +10,12 @@ Il y a des différences fondamentales entre un tuple dans une table et un objet 
 
 * Pas d'héritage ou de polymorphisme en base de données
 * La gestion des associations est différente (one-to-many et many-to-many)
-* De nombreux types de données sont différents (par exemple il y a de nombreuses façons de stocker une String en base de données)
+* De nombreux types de données sont différents (eg il y a de nombreuses façons de stocker une String en base de données)
 * Les contraintes de validation ne sont pas gérées de la même manière
 
 
-Le but de la solution d'ORM sera d'alléger ou de simplifier ces problèmes
+Le but de la solution d'O[R]M sera d'alléger ou de "simplifier" ces problèmes
+
 
 == Historique
 
@@ -40,7 +41,8 @@ Le but de la solution d'ORM sera d'alléger ou de simplifier ces problèmes
 * JPA
 
 
-// partie Hibernate
+
+// *************************************** partie Hibernate
 
 == Hibernate
 
@@ -192,7 +194,7 @@ cf http://www.hibernate.org
 
 
 
-// partie JDO
+// *************************************** partie JDO
 
 == JDO
 
@@ -232,7 +234,7 @@ https://wiki.apache.org/jdo/FrontPage
 https://cloud.google.com/appengine/docs/java/datastore/jdo/dataclasses
 
 
-// partie SQL
+// *************************************** partie SQL
 
 == SQL natif
 
@@ -248,16 +250,17 @@ Mais
 
 * connaissance obligatoire de la structure de la BD
 * jointures manuelles
-* mapping manuel
+* mapping "manuel"
 
 
-=== SQL natif : aides
+=== SQL natif : helpers
 
 Utilisation de frameworks pour simplifier la tâche de mapping
 
 * Spring JDBC Template
 * JOOQ
 * QueryDSL
+
 
 === Spring JDBC Template (1)
 
@@ -280,7 +283,139 @@ include::{sourcedir}/jdbctemplate/Application.java[tags=insertTable,indent=0]
 include::{sourcedir}/jdbctemplate/Application.java[tags=selectTable,indent=0]
 ----
 
-// partie JPA
+=== QueryDSL
+
+Motivation initiale : maintenir les queries HQL de façon typesafe au lieu de String concatenation
+
+** HQL for Hibernate au début,
+
+** maintenant JPA, JDO, JDBC, Lucene, Hibernate Search, MongoDB, Collections et RDFBean
+
+
+ifdef::backend-revealjs[=== !]
+
+
+Propose du typage statique pour les requêtes
+
+* Querydsl for JPA est une alternative typée pour JPQL et Criteria
+
+* Utilisation avec maven (dep + plugin)
+
+* JPAAnnotationProcessor scan les annotations `@Entity` et génére du code (source) [à ajouter dans les sources folder]
+
+
+=== QueryDSL : exemple
+
+[source,java]
+@Entity
+public class Customer {
+    private String firstName;
+    private String lastName;
+}
+
+Querydsl génère une classe QCustomer dans le même package qui contient le typage statique
+pour les requêtes
+
+ifdef::backend-revealjs[=== !]
+
+* Instanciation :
+
+[source,java]
+// default static
+QCustomer customer = QCustomer.customer;
+// new
+QCustomer customer = new QCustomer("myCustomer");
+
+* Requête typée :
+[source,java]
+QCustomer customer = QCustomer.customer;
+Customer bob = queryFactory.selectFrom(customer)
+  .where(customer.firstName.eq("Bob"))
+  .fetchOne();
+
+ifdef::backend-revealjs[=== !]
+
+* API fluent pour les requêtes :
+[source,java]
+queryFactory.selectFrom(customer)
+    .where(customer.firstName.eq("Bob").and(customer.lastName.eq("Wilson")));
+
+** en JPQL, String (pas de type!)
+`select customer from Customer as customer
+ where customer.firstName = "Bob" and customer.lastName = "Wilson"`
+
+
+ifdef::backend-revealjs[=== !]
+
+* Join (inner join, join, left join and right join) :
+[source,java]
+QCat cat = QCat.cat;
+QCat mate = new QCat("mate");
+QCat kitten = new QCat("kitten");
+queryFactory.selectFrom(cat)
+    .innerJoin(cat.mate, mate)
+    .leftJoin(cat.kittens, kitten)
+    .fetch()
+
+** en JPQL, String (pas de type!)
+`select cat from Cat as cat
+ inner join cat.mate as mate
+ left outer join cat.kittens as kitten`
+
+
+=== JOOQ
+
+jOOQ (Java Object Oriented Querying) permet de réaliser des requêtes SQL en Java,
+il supporte les principaux SGBD (Postgres, MySQL, Oracle, H2...)
+
+jOOQ repose sur un système de génération de code afin de créer les classes correspondant
+aux tables présentes en base [plugin jooq-codegen dans pom.xml]
+
+Permet du typage statique sur les requêtes
+
+
+=== JOOQ : exemple
+
+Avec un objet du modèle :
+[source,java]
+@Table("my_table")
+public MyObject{
+	@Id
+	@Column
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private Long id;
+	@Column
+	private String myField_1;
+	// getters and setters
+}
+
+On peut écrire :
+
+[source,java]
+----
+try (Connection conn = DriverManager.getConnection("localhost:5433/my_db", "db_user", "db_password")) {
+	DSLContext context = DSL.using(conn, SQLDialect.POSTGRES);
+
+	Request request = context.select(Tables.MY_TABLE.ID,
+								 Tables.MY_TABLE.FIELD_1,
+								 Tables.MY_OTHER_TABLE.fields())// La méthode fields() permet de retourner tous les champs de la table
+	.from(Tables.MY_TABLE)
+	.join(Tables.MY_OTHER_TABLE)
+	.onKey()// La méthode onKey() permet de laisser jOOQ déterminer la clef étrangère à laquelle on fait référence.
+	.where(Tables.MY_TABLE.FIELD_1.eq(50))//eq() permet de tester une égalité
+	.orderBy(Tables.MY_TABLE.FIELD_1.desc())
+	.limit(1);
+
+	List<MyObject> results = request.fetchInto(MyObject.class);
+
+}catch(Exception E){
+	///...
+}
+----
+
+
+
+// *************************************** partie JPA
 
 == JPA
 

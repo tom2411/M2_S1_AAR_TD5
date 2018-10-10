@@ -1,6 +1,6 @@
 = Tests en archi n-tiers
 ifndef::masterdoc[]
-include::header.include[]
+include::_header.adoc[]
 endif::masterdoc[]
 
 Le bon testeur, il teste
@@ -504,6 +504,7 @@ public class BookBean implements Serializable {
 == Horizontal
 
 [source,java]
+----
 @Transactional
 @Path("/books")
 public class BookEndpoint {
@@ -524,5 +525,5 @@ public class BookEndpoint {
     }
   return Response.ok(entity).build();
 }
-
+----
 

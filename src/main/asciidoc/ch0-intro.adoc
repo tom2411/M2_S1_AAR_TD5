@@ -1,6 +1,6 @@
 = Introduction
 ifndef::masterdoc[]
-include::header.adoc[]
+include::_header.adoc[]
 endif::masterdoc[]
 
 == Le cours
@@ -45,7 +45,7 @@ Les notes de slides sont visibles dans la fenêtre speaker, mais aussi dans le p
 == Veille techno
 
 * blogs : xebia,ippon,octo...
-* dzone.com /developpez
+* dzone.com /developpez.com
 * Devoxx(FR) sur youtube
 * http://lescastcodeurs.com/
 * twitter
@@ -105,7 +105,7 @@ image::archi-n-tiers.png[scaledwidth=100%]
 
 Attention, deux rôles bien distincts :
 
-* Le Mapping O/R, sauvegarde et restauration des objets [Java] en BD[R]
+* Le Mapping O/R[autre], sauvegarde et restauration des objets [Java] en BD[R]
 
 => première partie de ce cours
 
