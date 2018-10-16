@@ -257,9 +257,11 @@ Mais
 
 Utilisation de frameworks pour simplifier la tâche de mapping
 
+Les plus utilisés :
+
 * Spring JDBC Template
-* JOOQ
 * QueryDSL
+* JOOQ
 
 
 === Spring JDBC Template (1)

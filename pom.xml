@@ -145,7 +145,7 @@
                 </dependencies>
                 <configuration>
                     <sourceDirectory>src/main/asciidoc</sourceDirectory>
-                    <sourceDocumentName>index.adoc</sourceDocumentName>
+                    <!--<sourceDocumentName>index.adoc</sourceDocumentName>-->
                     <requires>
                         <require>asciidoctor-diagram</require>
                     </requires>
@@ -166,7 +166,7 @@
                             <backend>revealjs</backend>
                             <templateDir>${project.build.directory}/asciidoctor-reveal.js-${asciidoctor-revealjs.version}/templates/slim</templateDir>
                             <sourceHighlighter>coderay</sourceHighlighter>
-                            <sourceDocumentName>index.adoc</sourceDocumentName>
+                            <!--<sourceDocumentName>index.adoc</sourceDocumentName>-->
                             <resources>
                                 <resource>
                                     <!-- (Mandatory) Directory to copy from. Paths are relative to maven's ${baseDir} -->
