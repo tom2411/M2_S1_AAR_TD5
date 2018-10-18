@@ -1,6 +1,6 @@
-= AAR TP2 : Intégration avec Spring
+= AAR TP6 : Intégration avec Spring
 Frédéric Moal <frederic.moal@univ-orleans.fr>
-v1.0, 2017-10-26: une première version
+v1.1, 2018-10-18: spring boot 2.0.6
 ifndef::imagesdir[:imagesdir: ../images]
 ifndef::sourcedir[:sourcedir: ../../java]
 ifndef::resourcesdir[:resourcesdir: ../../resources]
