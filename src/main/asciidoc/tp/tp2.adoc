@@ -32,7 +32,18 @@ Pour cela, vous allez reprendre les différentes couches (modele, dao, service)
 réalisées dans le TP précédent, mais en demandant à Spring de gérer les transactions
 et la création puis l'injection des couches les unes dans les autres.
 
-Pour vous aider à écrire la couche DAO, récupérez dans les sources :AbstractDao.java et AbstractDaoImpl.java
+Pour vous aider à écrire la couche DAO, ajoutez les classes :
+AbstractDao.java
+[source,java]
+----
+include::{sourcedir}/dao/AbstractDao.java[]
+----
+et jpa/AbstractDaoImpl.java :
+----
+include::{sourcedir}/dao/jpa/AbstractDaoImpl.java[]
+----
+
+
 qu'il suffit d'instancier pour les 3 objets Client, Compte, Livret
 
 [source,java]
