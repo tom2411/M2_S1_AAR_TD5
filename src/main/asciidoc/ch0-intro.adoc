@@ -5,12 +5,12 @@ endif::masterdoc[]
 
 == Le cours
 
-Le cours : https://orleans.miage.fr/confluence/display/jee/
+La page web du cours : https://orleans.miage.fr/confluence/display/jee/
 
 
 CAUTION: Code source du cours en Asciidoc
 
-https://orleans.miage.fr/stash/projects/ARCHI/repos/coursaar/
+https://pdicost.univ-orleans.fr/git/projects/AAR/repos/cours/
 
 pour générer les slides ET un support pdf : `mvn`
 
