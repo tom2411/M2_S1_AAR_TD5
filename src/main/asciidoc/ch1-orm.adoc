@@ -1086,3 +1086,6 @@ http://deptinfo.unice.fr/~grin/mescours/minfo/modpersobj/supports/index.html
 Cacher les exceptions de bas niveau (SQL)
 
 Gestion des transactions : dans DAO ou dans service si nécessité de plusieurs appels DAO (eg virement)
+
+
+

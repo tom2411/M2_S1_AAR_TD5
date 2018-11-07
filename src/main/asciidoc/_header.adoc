@@ -1,5 +1,5 @@
 Frédéric Moal <frederic.moal@univ-orleans.fr>
-2017-11-17
+2018-11-05
 :revnumber: {project-version}
 ifndef::imagesdir[:imagesdir: images]
 ifndef::sourcedir[:sourcedir: ../java]

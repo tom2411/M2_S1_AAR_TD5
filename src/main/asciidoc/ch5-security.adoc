@@ -15,7 +15,7 @@ Avant de sécuriser votre application, il faut avant sécuriser le contexte !
 
 * Normalement, de bout en bout (load balancer, ...)
 
-
+* Lecture de https://spring.io/guides/topicals/spring-security-architecture/
 
 
 
@@ -46,6 +46,8 @@ richesse de celle-ci
 ** Par exemple, le fait d’avoir facilement plusieurs fichiers d’infrastructure en
 fonction de l’environnement est très utile pour un framework de sécurité
 
+ifdef::backend-revealjs[=== !]
+
 *  Il est portable d’un serveur à un autre
 *  Il propose une large palette de plugins : utilisation de solutions de
 SSO (CAS), de la sécurité Windows (NTLM), de OpenID...
@@ -56,16 +58,17 @@ objets, etc...
 
 === Authentification et Autorisation
 
-*  Il y a deux concepts principaux en sécurité
-**  Authentification
-***  Vérification de l’identité de la personne
-***  En entreprise, on utilise généralement un serveur LDAP
-**  Autorisations
-***  Les droits sur l’application possédés par la personne
-***  Généralement, ces droits sont stockés dans un serveur LDAP ou
+Il y a deux concepts principaux en sécurité
+
+*  Authentification
+**  Vérification de l’identité de la personne
+**  En entreprise, généralement un serveur LDAP
+*  Autorisations
+**  Les droits sur l’application possédés par la personne
+**  ces droits sont stockés dans un serveur LDAP ou
 une base de données
 
-ifdef::backend-revealjs[== !]
+ifdef::backend-revealjs[=== !]
 
 *  Spring Security permet de traiter ces deux concepts de
 manière indépendante : par exemple l’authentification en
@@ -86,8 +89,6 @@ via le fichier web.xml
     <url-pattern>/*</url-pattern>
 </filter-mapping>
 
-*  Il peut ainsi sécuriser toutes les requêtes vers l’application
-
 
 === Fonctionnement interne
 
@@ -102,19 +103,71 @@ déconnexion de l’utilisateur
 **  Ils vont gérer les cas d’erreurs et rediriger
 l’utilisateur vers les pages d’erreurs
 
-ifdef::backend-revealjs[== !]
+ifdef::backend-revealjs[=== !]
 
 *  La configuration fournie par défaut :
 **  fonctionne parfaitement pour un site Web normal
 **  est entièrement paramétrable si besoin
 
 
+=== Structure
+
+L'authentification repose sur l'interface :
+[source,java]
+----
+public interface AuthenticationManager {
+  Authentication authenticate(Authentication authentication)
+    throws AuthenticationException;
+}
+----
+
+* qui doit renvoyer une `Authentification` si OK,
+* lève une AuthenticationException si KO,
+* renvoi `null` si ne peux pas décider
+
+=== Implémentation
+
+La plus commune :
+[source,java]
+----
+public interface AuthenticationProvider {
+	Authentication authenticate(Authentication authentication)
+			throws AuthenticationException;
+	boolean supports(Class<?> authentication);
+}
+----
+
+=== Utilisation
+
+Hiérarchie de Providers [en général par URIs]
+
+[.thumb]
+image::authentification.png[]
+
+
+=== Fonctionnement Web
+
+Installe une chaine dans les filtres
+
+[.thumb]
+image::security-filters.png[]
+
+ifdef::backend-revealjs[=== !]
+
+En interne, Spring Security enregistre des listes de filtres,
+chaque requête sera dispatchée sur *une* liste
+
+[.thumb]
+image::security-filters-dispatch.png[]
+
+
 === Configuration minimale
 
-*  Spring Security se configure ensuite dans un fichier de
-configuration Spring classique, aidé par un namespace
-spécialisé
+*  Spring Security se configure dans un fichier de
+configuration Spring classique [namespace
+spécialisé]
 [source,xml]
+----
 <http>
 <intercept-url pattern="/app/admin" access="ROLE_ADMIN"/>
 <intercept-url pattern="/app/**" access="ROLE_USER"/>
@@ -127,7 +180,7 @@ default-target-url="/app/index"/>
 <authentication-manager alias="authenticationManager">
 <authentication-provider user-service-ref="userDetailsService"/>
 </authentication-manager>
-
+----
 
 
 === La règles sur les URLs
@@ -139,7 +192,7 @@ URL donnée
 *  Ils se configurent avec des
 patterns «Ant»
 
-ifdef::backend-revealjs[== !]
+ifdef::backend-revealjs[=== !]
 
 *  Ils sont ordonnés : le premier filtre à
 intercepter la requête est celui qui va la traiter
@@ -160,7 +213,7 @@ page de login
 traiter l’authentification, la page d’erreur,
 etc...
 
-ifdef::backend-revealjs[== !]
+ifdef::backend-revealjs[=== !]
 
 *  La page de login va alors pointer
 vers l’URL de traitement de
@@ -204,7 +257,7 @@ authorities-by-username-query= "..."/>
 </authentication-provider>
 </authentication-manager>
 
-ifdef::backend-revealjs[== !]
+ifdef::backend-revealjs[=== !]
 
 *  Les requêtes par défaut sont :
 
@@ -241,7 +294,7 @@ Servlet fonctionnent donc
 **  Les Tag Lib ou frameworks (Struts) utilisant ces méthodes
 fonctionnent sans modification
 
-ifdef::backend-revealjs[== !]
+ifdef::backend-revealjs[=== !]
 
 *  Spring Security propose également sa propre Tag Lib, avec
 une API plus élaborée :
@@ -283,13 +336,13 @@ public void uneMethodeSecurisee() {
 utilisateur de ne plus renseigner son mot de passe pendant une
 période donnée
 
-ifdef::backend-revealjs[== !]
+ifdef::backend-revealjs[=== !]
 
 *  Il y a deux implémentations principales
 **  Une basée sur un hash, simple à mettre en place, mais qui pose un
 problème de sécurité car le mot de passe est alors utilisé dans l’
 empreinte MD5 stockée dans le cookie (avec un salt)
-**  Une basée sur une table en base de données recommandée car elle est plus sécurisée
+**  Une basée sur une table en base de données [recommandée]
 
 [source,xml]
 <http>
@@ -314,6 +367,314 @@ Activation par un starter security :
 </dependency>
 ----
 
++ éventuellement les starters pour ldap, ...
+
+
+=== par Défaut
+
+Authentification de type "Basic" activée par défaut pour toutes les URLs
+
+Au run, log du password du seul utilisateur (user) :
+
+`Using generated security password: ea13cfac-5b09-4baa-92c5-df400139a0ea`
+
+
+=== Configuration
+
+Config par annotations `@Configuration`
+
+Un exemple "complet" classique
+[source,java]
+----
+@Configuration
+@EnableWebSecurity
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+            .authorizeRequests()
+                .antMatchers("/", "/home").permitAll()
+                .anyRequest().authenticated()
+                .and()
+            .formLogin()
+                .loginPage("/login")
+                .permitAll()
+                .and()
+            .logout()
+                .permitAll();
+    }
+
+    @Bean
+    @Override
+    public UserDetailsService userDetailsService() {
+        UserDetails user =
+             User.withDefaultPasswordEncoder()
+                .username("user")
+                .password("password")
+                .roles("USER")
+                .build();
+
+        return new InMemoryUserDetailsManager(user);
+    }
+}
+----
+
+=== Autre exemple
+
+[source,java]
+----
+@Configuration
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		http.authorizeRequests()
+				.anyRequest().fullyAuthenticated()
+				.and()
+			.formLogin();
+	}
+	@Override
+	public void configure(AuthenticationManagerBuilder auth) throws Exception {
+		auth
+			.ldapAuthentication()
+				.userDnPatterns("uid={0},ou=people")
+				.groupSearchBase("ou=groups")
+				.contextSource()
+					.url("ldap://localhost:8389/dc=springframework,dc=org")
+					.and()
+				.passwordCompare()
+					.passwordEncoder(new LdapShaPasswordEncoder())
+					.passwordAttribute("userPassword");
+	}
+}
+----
+
+=== Configuration de la chaîne
+
+Enregistrement de plusieurs filtres avec `@Order` et filtrage
+[source,java]
+----
+@Configuration
+@Order(SecurityProperties.BASIC_AUTH_ORDER - 10)
+public class ApplicationConfigurerAdapter extends WebSecurityConfigurerAdapter {
+  @Override
+  protected void configure(HttpSecurity http) throws Exception {
+    http.antMatcher("/foo/**")
+      .authorizeRequests()
+        .antMatchers("/foo/bar").hasRole("BAR")
+        .antMatchers("/foo/spam").hasRole("SPAM")
+        .anyRequest().isAuthenticated();
+  }
+}
+----
+
+
+=== Droits sur les méthodes
+
+Possible sur les méthodes du Backend
+[source,java]
+----
+@SpringBootApplication
+@EnableGlobalMethodSecurity(securedEnabled = true)
+public class SampleSecureApplication {
+}
+
+@Service
+public class MyService {
+  @Secured("ROLE_USER")
+  public String secure() {
+    return "Hello Security";
+  }
+}
+----
+
+ifdef::backend-revealjs[=== !]
+
+Pour des contraintes plus complexes, on utilise
+`@PreAuthorize` et `@PostAuthorize` avec des expressions.
+
+
+
+=== Utilisation Web
+
+Dans un contexte REST par exemple, injection du contexte d'authentification par Spring
+
+[source,java]
+----
+@RequestMapping("/foo")
+public String foo(@AuthenticationPrincipal User user) {
+  ... // do stuff with user
+}
+// ou directement le `Principal`
+@RequestMapping("/foo")
+public String foo(Principal principal) {
+  Authentication authentication = (Authentication) principal;
+  User = (User) authentication.getPrincipal();
+  ... // do stuff with user
+}
+----
+
+=== Filter Tunning
+
+Possibilité d'utiliser ses propres filtres, eg Token JWT !
+
+[source,java]
+----
+@EnableWebSecurity
+public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.cors().and().csrf().disable().authorizeRequests()
+                .antMatchers(HttpMethod.GET, "/public/*").permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .addFilter(new JwtAuthentificationFilter(authenticationManager()))
+                .addFilter(new JwtAuthorizationFilter(authenticationManager()))
+                // this disables session creation on Spring Security
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    }
+----
+
+ifdef::backend-revealjs[=== !]
+
+[source,java]
+----
+public class JwtAuthentificationFilter extends UsernamePasswordAuthenticationFilter {
+
+    public JwtAuthentificationFilter(AuthenticationManager authenticationManager) {
+        setAuthenticationManager(authenticationManager);
+    }
+
+    @Override
+    protected void successfulAuthentication(HttpServletRequest req,
+                                            HttpServletResponse res,
+                                            FilterChain chain,
+                                            Authentication auth) throws IOException, ServletException {
+        CustomUserDetails customUserDetails = (CustomUserDetails)auth.getPrincipal();
+        // username & password authentified
+        String username = obtainUsername(req);
+        String password = obtainPassword(req);
+        // record authorities
+        Claims claims = Jwts.claims().setSubject(customUserDetails.getUsername());
+        claims.put("scopes", auth.getAuthorities().stream().map(s -> s.toString()).collect(Collectors.toList()));
+        claims.put("nom", customUserDetails.getNom());
+        claims.put("prenom", customUserDetails.getPrenom());
+        claims.put("email", customUserDetails.getEmail());
+        // build JWT Token
+        String token = Jwts.builder()
+                .setClaims(claims)
+                .setSubject(customUserDetails.getUsername())
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .signWith(SignatureAlgorithm.HS512, SECRET.getBytes())
+                .compact();
+        res.addHeader(HEADER_STRING, TOKEN_PREFIX + token);
+    }
+----
+
+ifdef::backend-revealjs[=== !]
+
+[source,java]
+----
+public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthorizationFilter.class);
+
+    public JwtAuthorizationFilter(AuthenticationManager authManager) {
+        super(authManager);
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest req,
+                                    HttpServletResponse res,
+                                    FilterChain chain) throws IOException, ServletException {
+        String header = req.getHeader(HEADER_STRING);
+        if (header == null || !header.startsWith(TOKEN_PREFIX)) {
+            chain.doFilter(req, res);
+            return;
+        }
+        UsernamePasswordAuthenticationToken authentication = getAuthentication(req);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        chain.doFilter(req, res);
+    }
+
+    private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
+        String token = request.getHeader(HEADER_STRING);
+        if (token != null) {
+            // decode token
+            Jws<Claims> jwsClaims = Jwts.parser()
+                    .setSigningKey(SECRET.getBytes())
+                    .parseClaimsJws(token.replace(TOKEN_PREFIX, ""));
+            String user = jwsClaims.getBody().getSubject();
+            if (user != null) {
+                List<String> scopes = jwsClaims.getBody().get("scopes", List.class);
+                List<GrantedAuthority> authorities = scopes.stream()
+                        .map(authority -> AuthoritiesRoles.getRoleFromRoleName(authority).getAuthority())
+                        .collect(Collectors.toList());
+                String nom = jwsClaims.getBody().get("nom", String.class);
+                String prenom = jwsClaims.getBody().get("prenom", String.class);
+                String email = jwsClaims.getBody().get("email", String.class);
+                UsernamePasswordAuthenticationToken userToken =  new UsernamePasswordAuthenticationToken(user, authorities);
+                CustomUserDetails details = new CustomUserDetails((UserDetails)userToken.getDetails(), nom, prenom, email);
+                userToken.setDetails(details);
+
+                return userToken;
+            }
+            return null;
+        }
+        return null;
+    }
+}
+----
+
+
+=== OAuth2
+
+Support en tant que client (`@EnableOAuth2Sso`) et/ou serveur (`@EnableAuthorizationServer`)
+
+cf
+https://spring.io/guides/tutorials/spring-boot-oauth2/
+
+et la doc en ligne
+https://docs.spring.io/spring-security-oauth2-boot/
+
+
+=== OAuth2 Client
+
+Configuration "simple"
+[source,xml]
+<dependency>
+    <groupId>org.springframework.security.oauth.boot</groupId>
+    <artifactId>spring-security-oauth2-autoconfigure</artifactId>
+    <version>2.2.0.BUILD-SNAPSHOT</version>
+</dependency>
+
+ifdef::backend-revealjs[=== !]
+
+[source,java]
+----
+@SpringBootApplication
+@EnableOAuth2Sso
+public class SocialApplication {
+  ...
+}
+----
+
+ifdef::backend-revealjs[=== !]
+
+[source,yml]
+----
+security:
+  oauth2:
+    client:
+      clientId: 233668646673605
+      clientSecret: 33b17e044ee6a4fa383f46ec6e28ea1d
+      accessTokenUri: https://graph.facebook.com/oauth/access_token
+      userAuthorizationUri: https://www.facebook.com/dialog/oauth
+      tokenName: oauth_token
+      authenticationScheme: query
+      clientAuthenticationScheme: form
+    resource:
+      userInfoUri: https://graph.facebook.com/me
+----
+
 
 === Conclusion sur Spring Security
 
@@ -321,12 +682,12 @@ Activation par un starter security :
 répandu en entreprise
 **  Il permet de sécuriser des applications Web, en particulier en
 donnant des règles d’accès aux URLs
-**  Il peut également sécuriser des Beans Spring grâce à un Aspect
+**  Il peut également sécuriser des Beans Spring
 
-ifdef::backend-revealjs[== !]
+ifdef::backend-revealjs[=== !]
 
 *  Sa configuration de base est relativement simple, avec l’
 utilisation d’un namespace spécifique
 *  Il s’intègre avec de nombreuses solutions existantes :
 serveur LDAP, base de données, CAS, NTLM, OpenID...
-
+* Configurations particulières un peu (!) complexes

@@ -1414,19 +1414,22 @@ WHERE id = 1;
 === Les transactions en Java
 *  En JDBC
 [source,java]
+----
 conn = dataSource. getConnection ();
 conn.setAutoCommit (false);
 // requêtes SQL
 conn.commit();
+----
 
 *  Avec JTA (Java Transaction API)
 [source,java]
+----
 UserTransaction utx = ctx. getUserTransaction ();
 // Démarrage de la Transaction
 utx.begin();
 // Exécution des requêtes
 utx.commit();
-
+----
 
 
 === Spring Transactions
