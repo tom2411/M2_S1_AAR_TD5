@@ -1,207 +1,98 @@
-= AAR TP3 : Tests
+= AAR TP7 : Spring Boot
 Frédéric Moal <frederic.moal@univ-orleans.fr>
-v1.0, 2017-10-26: une première version
+v2.0, 2018-11-06: nouveau sujet
 ifndef::imagesdir[:imagesdir: ../images]
 ifndef::sourcedir[:sourcedir: ../../java]
 ifndef::resourcesdir[:resourcesdir: ../../resources]
 
 
-== Architecture standard avec Spring
+== Pré-requis
 
-Le but de ce TP est de mettre en place des Tests sur l'ensemble
-des couches développées dans le TP précédent :
+* Rappel des pré-requis
 
-image::tp3-arch1.png[]
+** MySQL doit être lancé sur localhost, avec une database banque existante.
 
-== Exercice 1 : Tests de la DAO
+** avec docker :
+[source,bash]
+docker run --name mysql -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 -d mysql
 
-Pour réaliser ces tests, il faut mettre en place un environnement spécifique
-pour la base de données - vous allez utiliser H2, une BD SQL Java en mémoire,
-qui va nous permettre de ré-initialiser facilement l'état de la base
-avant chaque test.
-
-Dans le pom.xml, ajoutez la dépendance à H2 (com.h2database),
-à spring-test (org.springframework)
-et à junit (4) [attention, en scope test !]
-
-[source,xml]
-----
-    <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-test</artifactId>
-        <version>4.1.1.RELEASE</version>
-        <scope>test</scope>
-    </dependency>
-    <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>4.11</version>
-        <scope>test</scope>
-    </dependency>
-    <dependency>
-        <groupId>com.h2database</groupId>
-        <artifactId>h2</artifactId>
-        <version>1.4.182</version>
-        <scope>test</scope>
-    </dependency>
-----
-
-Copiez la configuration Spring initiale pour créer une config spécifique
-à l'environnement de test, et modifiez la configuration pour utiliser H2
-à la place de MySQL :
-
-[source,xml]
-----
-    <?xml version="1.0" encoding="UTF-8"?>
-    <beans xmlns="http://www.springframework.org/schema/beans"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns:context="http://www.springframework.org/schema/context"
-        xsi:schemaLocation="
-            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
-
-        <!-- H2 dataSource for testing environnement -->
-        <bean id="dataSource" class="org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy">
-            <constructor-arg>
-                <bean class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
-                    <property name="driverClass" value="org.h2.Driver" />
-                    <property name="url" value="jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=2" />
-                </bean>
-            </constructor-arg>
-        </bean>
-
-        <!-- provides a H2 console to look into the db if necessary -->
-        <!--
-        <bean id="org.h2.tools.Server-WebServer" class="org.h2.tools.Server"
-                factory-method="createWebServer" depends-on="dataSource"
-                init-method="start" lazy-init="false">
-            <constructor-arg value="-web,-webPort,11111" />
-        </bean>
-         -->
-
-        <!-- Loading JPA -->
-        <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
-            <property name="dataSource" ref="dataSource" />
-            <property name="jpaVendorAdapter">
-                <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
-                </bean>
-            </property>
-            <property name="jpaProperties">
-                <props>
-                    <prop key="hibernate.dialect">org.hibernate.dialect.H2Dialect</prop>
-                    <prop key="hibernate.hbm2ddl.auto">create</prop>
-                    <prop key="hibernate.connection.release_mode">after_transaction</prop>
-                    <prop key="hibernate.show_sql">false</prop>
-                </props>
-            </property>
-        </bean>
-
-        <!-- Transaction Manager -->
-        <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
-            <property name="entityManagerFactory" ref="entityManagerFactory"/>
-        </bean>
-
-        <!-- Command list scanning -->
-        <context:component-scan base-package="dao"/>
-    </beans>
-----
-
-Vous devez injecter cette datasource dans l'entity manager.
-
-Ajoutez un script sql de remplissage de la BD pour les tests
-    dans les resources de test, par exemple [à adapter au schéma de VOTRE BD] :
-
-[source,sql]
-INSERT INTO `client` VALUES (1003,'Orléans','Martin','Paul'),(1015,'Olivet','Dupont','Sylvie'),(1109,'La ferté','Dupond','Henri');
-INSERT INTO `compte` VALUES (198,'2010-01-31',2300,1003),(203,'2001-07-05',5440,1015),(243,'2013-12-25',450,1109);
-INSERT INTO `livret` VALUES (205,'2011-07-05',655,1015,0.05);
-
-Pour éviter de ré-écrire 3 fois le même code pour les 3 DAO,
-vous pouvez utiliser un squelette de test abstrait AbstractDaoTest.java :
+** Client Mysql avec docker :
+[source,bash]
+docker run -it --link mysql:mysql --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD"'
 
 
+== Full annotation avec Spring Boot
+
+Le but est de mettre en place une architecture complète (BD MySQL, JPA, DAO, service)
+ainsi qu'un front Web sécurisé par Spring Security.
+
+=== Le service Banque en Spring Boot
+
+Refaire la même application [cd TP 6] en mode Spring Boot en utilisant Spring data jpa.
+
+* Utilisez Spring Initializr pour fabriquer un nouveau projet maven.
+
+* Récupérez le code source de votre modèle
+
+* Ajoutez des Reposity en utilisant Spring Data JPA
+
+* Modifiez votre couche de service pour utiliser cette nouvelle DAO
+
+* Ajoutez dans le fichier application.properties dans les ressources :
+[source,properties]
+spring.datasource.url=jdbc:mysql://localhost:3306/banque?useSSL=false
+spring.datasource.username=root
+spring.datasource.password=root
+
+cf
+https://spring.io/guides/gs/accessing-data-jpa/
+
+
+=== Un front web pour l'application
+
+* Ajoutez une couche web [Thymeleaf] sur cette application
+. Déplacer les classes précédentes dans un package `backend`
+. Ajouter un nouveau package `frontend` dans lequel vous ajouterez
+un controleur Spring MVC pour les urls `/clients`
+. Ajoutez un formulaire statique permettant de saisir le no d'un client
+. Ajoutez une page affichant un client et la liste de ses comptes,
+
+* Comme il est assez délicat de trouver le no généré pour un client,
+. Ajoutez une page statique d'accueil qui redirigera (automatiquement) vers la page de sélection d'un client en passant
+par le contrôleur
+. Ajoutez une page contenant un formulaire permettant de sélectionner à l'aide d'une liste déroulante un client enregistré en base
+. Ajoutez une page affichant un client (et la liste de ses comptes),
+renvoyé par le controleur à partir du no passé en paramètre par le formulaire précédent
+
+cf https://spring.io/guides/gs/serving-web-content/
+
+=== Activation de Spring Security
+
+* Activez Spring Security dans le projet
+
+* Configurez le projet pour stocker les utilisateurs dans la BD MySQL
+
+Les utilisateurs seront ici les clients, qui pourront se connecter ;
+il faut donc ajouter des informations dans l'entité Client pour permettre de gérer les connections :
 [source,java]
 ----
-package dao;
-
-    import javax.persistence.EntityManager;
-    import javax.persistence.PersistenceContext;
-    import javax.sql.DataSource;
-
-    import org.junit.Before;
-    import org.junit.runner.RunWith;
-    import org.springframework.beans.factory.annotation.Autowired;
-    import org.springframework.test.context.ContextConfiguration;
-    import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
-    import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-    import org.springframework.transaction.annotation.Transactional;
-
-    @RunWith(SpringJUnit4ClassRunner.class)
-    @ContextConfiguration(locations={"/spring-test.xml"})
-    @Transactional
-    public abstract class AbstractDaoTest extends AbstractTransactionalJUnit4SpringContextTests {
-        @Autowired
-        DataSource dataSrc;
-        @PersistenceContext
-        private EntityManager em;
-
-        @Before
-        public void beforeTest() {
-            setDataSource(dataSrc);
-            super.executeSqlScript("classpath:banque-test.sql", false);
-        }
-        protected void flush() {
-            em.flush();
-        }
-        public DataSource getDataSrc() {
-            return dataSrc;
-        }
-        public void setDataSrc(DataSource dataSrc) {
-            this.dataSrc = dataSrc;
-        }
-    }
+	private String password;
+	private boolean active;
+	@ElementCollection(fetch = EAGER)
+	@CollectionTable(name = "client_roles")
+	private Set<String> roles;
 ----
 
-Ce squelette lance automatiquement le script sql avant chaque test.
+On ajoute une configuration WebSecurityConfig pour définir la source
+d'authentification comme étant une jdbcAuthentication.
 
-Pour écrire les Tests des Dao, il suffit d'hériter de cette classe abstraite
-et de tester les méthodes de la Dao correspondante (eg ClientDaoTest)
-
-Pour lancer vos tests, soit par IntelliJ, run As... JUnit Test,
-ou encore maven par un `mvn test`.
-
-
-=== Exercice 2 - Tests des services
-
-Pour tester la couche de service, par exemple la méthode virement, il faut créer des Mocks des différentes Dao dont elle dépend.
-
-Ajoutez EasyMock (org.easymock) aux dépendances du pom.xml
-(en scope test toujours)
-
-[source,xml]
-    <dependency>
-        <groupId>org.easymock</groupId>
-        <artifactId>easymock</artifactId>
-        <version>3.2</version>
-        <scope>test</scope>
-    </dependency>
-
-Créez une classe de test ServiceImplTest.java, dans laquelle
-vous instanciez l'implémentation du Service,
-mais en lui passant des Mocks de Dao au lieu des vraies Dao
-(méthode createMock(Interface.class)).
-
-- Testez la méthode de virement entre deux comptes
-(voir le cours de Yohan en M1 MIAGE Test et Qualité
-ou http://easymock.org/user-guide.html)
-
-- Modifiez la facade de service pour lever une exception `ClientNotFoundException`
-sur getClient(id) quand le client n'existe pas en base ;
-ajoutez les tests JUnit pour tester les deux situations.
-
-
-== Exercice 3 : Spring Boot reloaded
-
-Ré-écrire les mêmes tests mais pour la version Spring Boot de l'application
-
-cf le tuto : http://www.baeldung.com/spring-boot-testing
+Il va falloir stocker les clients avec leur mot de passe encodé dans la base ;
+on ajoute un Bean dans WebSecurityConfig pour le faire dans la couche de service :
+[source,java]
+----
+    @Bean
+    public PasswordEncoder encoder() {
+        return new BCryptPasswordEncoder();
+    }
+----
+Cet encoder sera utilisé par jdbcAuthentication et par la couche de service au moment de l'enregistrement des clients.

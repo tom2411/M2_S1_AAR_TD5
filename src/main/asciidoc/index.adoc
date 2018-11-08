@@ -19,11 +19,11 @@ include::ch1-orm.adoc[]
 
 include::ch2-spring.adoc[]
 
-include::ch3-tests.adoc[]
+include::ch3-springboot.adoc[]
 
-include::ch4-springboot.adoc[]
+include::ch4-security.adoc[]
 
-include::ch5-security.adoc[]
+include::ch5-tests.adoc[]
 
 :leveloffset: -1
 
@@ -31,11 +31,17 @@ include::ch5-security.adoc[]
 // include exercises to pdf only
 ifdef::backend-pdf[]
 == Exercices
+
 :leveloffset: +2
+
 include::tp/tp1.adoc[]
 
 include::tp/tp2.adoc[]
 
 include::tp/tp3.adoc[]
+
+include::tp/tp4.adoc[]
+
 :leveloffset: -2
+
 endif::[]

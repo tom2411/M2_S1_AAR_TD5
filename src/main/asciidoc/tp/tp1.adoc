@@ -10,7 +10,7 @@ ifndef::resourcesdir[:resourcesdir: ../../resources]
 
 Le but de ce premier TP est de tester et comprendre la persistance des classes Java
 dans un environnement sans injecteur de dépendances et de maitriser
-les outils JPA proposés par IntelliJ/Eclipse JEE.
+les outils JPA proposés par IntelliJ/Eclipse.
 Nous allons tester l'implémentation de référence de JPA 2.2, EclipseLink, puis Hibernate.
 
 * Pré-requis
