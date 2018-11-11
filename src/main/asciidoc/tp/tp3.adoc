@@ -10,7 +10,7 @@ ifndef::resourcesdir[:resourcesdir: ../../resources]
 
 * Rappel des pré-requis
 
-** MySQL doit être lancé sur localhost, avec une database banque existante.
+** MySQL doit être lancé sur localhost, avec une database "banque" existante.
 
 ** avec docker :
 [source,bash]
@@ -20,10 +20,12 @@ docker run --name mysql -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 -d mysql
 [source,bash]
 docker run -it --link mysql:mysql --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD"'
 
+** Création de la base : `create database banque;`
 
 == Full annotation avec Spring Boot
 
-Le but est de mettre en place une architecture complète (BD MySQL, JPA, DAO, service)
+Le but est de mettre en place une architecture complète
+avec un backend (BD MySQL, JPA, DAO, service) en Spring Boot
 ainsi qu'un front Web sécurisé par Spring Security.
 
 === Le service Banque en Spring Boot
@@ -32,20 +34,34 @@ Refaire la même application [cd TP 6] en mode Spring Boot en utilisant Spring d
 
 * Utilisez Spring Initializr pour fabriquer un nouveau projet maven.
 
-* Récupérez le code source de votre modèle
+* Récupérez le code source de votre modèle (TP précédent)
 
-* Ajoutez des Reposity en utilisant Spring Data JPA
+* Ajoutez des Reposity pour chaque classe du modèle en utilisant Spring Data JPA
 
-* Modifiez votre couche de service pour utiliser cette nouvelle DAO
+* Récupérez et modifiez votre couche de service pour utiliser cette nouvelle DAO
 
 * Ajoutez dans le fichier application.properties dans les ressources :
 [source,properties]
+----
 spring.datasource.url=jdbc:mysql://localhost:3306/banque?useSSL=false
 spring.datasource.username=root
 spring.datasource.password=root
-
+spring.jpa.show-sql = false
+spring.jpa.hibernate.ddl-auto = update
+----
 cf
 https://spring.io/guides/gs/accessing-data-jpa/
+
+* Ajoutez un Bean dans votre classe d'application pour sauver quelques données en base au run
+[source,java]
+----
+    @Bean
+    public CommandLineRunner demo(BanqueService service) {
+        return (args) -> {
+        ...
+        };
+    }
+----
 
 
 === Un front web pour l'application
@@ -65,6 +81,7 @@ par le contrôleur
 renvoyé par le controleur à partir du no passé en paramètre par le formulaire précédent
 
 cf https://spring.io/guides/gs/serving-web-content/
+
 
 === Activation de Spring Security
 
@@ -86,13 +103,13 @@ il faut donc ajouter des informations dans l'entité Client pour permettre de g�
 On ajoute une configuration WebSecurityConfig pour définir la source
 d'authentification comme étant une jdbcAuthentication.
 
-Il va falloir stocker les clients avec leur mot de passe encodé dans la base ;
+Il va falloir stocker les clients avec leurs mots de passe encodés dans la base ;
 on ajoute un Bean dans WebSecurityConfig pour le faire dans la couche de service :
 [source,java]
 ----
-    @Bean
-    public PasswordEncoder encoder() {
-        return new BCryptPasswordEncoder();
-    }
+@Bean
+public PasswordEncoder encoder() {
+    return new BCryptPasswordEncoder();
+}
 ----
 Cet encoder sera utilisé par jdbcAuthentication et par la couche de service au moment de l'enregistrement des clients.
