@@ -624,6 +624,99 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 }
 ----
 
+=== Custom Authent : mode classique
+
+Méthode de base pour la définition d'une custom Authent : utiliser l'AuthenticationManagerBuilder
+[source,java]
+----
+@Configuration
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+	@Override
+	public void configure(AuthenticationManagerBuilder auth) throws Exception {
+	    auth.
+	}
+----
+
+
+=== Custom Auth : AuthentificationProvider
+
+Autre possibilité : créer un bean AuthenticationProvider custom.
+
+CAUTION: This is only used if the AuthenticationManagerBuilder has not been populated
+
+[source,java]
+----
+@Bean
+public MyAuthenticationProvider myAuthenticationProvider() {
+    return new MyAuthenticationProvider();
+}
+...
+class MyAuthenticationProvider implements AuthenticationProvider {}
+----
+
+=== Custom Auth : UserDetailService
+
+Autre possibilité : créer un bean UserDetailsService custom.
+
+CAUTION: This is only used if the AuthenticationManagerBuilder has not been populated and no AuthenticationProviderBean is defined.
+
+[source,java]
+----
+@Bean
+public SpringDataUserDetailsService springDataUserDetailsService() {
+    return new SpringDataUserDetailsService();
+}
+
+class SpringDataUserDetailsService implements UserDetailsService {}
+----
+
+=== du Multi http config
+
+Deux configs http différentes : une pour les URLs /api/** (eg REST)
+et l'autre pour le reste (eg web)
+
+[source,java]
+----
+@EnableWebSecurity
+public class MultiHttpSecurityConfig {
+    @Bean
+    public UserDetailsService userDetailsService() throws Exception {
+        // ensure the passwords are encoded properly
+        UserBuilder users = User.withDefaultPasswordEncoder();
+        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
+        manager.createUser(users.username("user").password("password").roles("USER").build());
+        manager.createUser(users.username("admin").password("password").roles("USER","ADMIN").build());
+        return manager;
+    }
+
+    @Configuration
+    @Order(1)
+    public static class ApiWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
+        protected void configure(HttpSecurity http) throws Exception {
+            http
+                .antMatcher("/api/**")
+                .authorizeRequests()
+                    .anyRequest().hasRole("ADMIN")
+                    .and()
+                .httpBasic();
+        }
+    }
+
+    @Configuration
+    public static class FormLoginWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
+
+        @Override
+        protected void configure(HttpSecurity http) throws Exception {
+            http
+                .authorizeRequests()
+                    .anyRequest().authenticated()
+                    .and()
+                .formLogin();
+        }
+    }
+}
+----
+
 
 === OAuth2
 
@@ -674,6 +767,7 @@ security:
     resource:
       userInfoUri: https://graph.facebook.com/me
 ----
+
 
 
 === Conclusion sur Spring Security
