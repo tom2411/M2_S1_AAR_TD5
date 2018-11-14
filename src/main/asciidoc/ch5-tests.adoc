@@ -486,6 +486,12 @@ public class HomeControllerTest { // Web test for HomeController
 }
 ----
 
+== Autres types de Tests
+
+* REST : Karate, SoapUI, ...
+* UI : Selenium, ...
+* Charge : Gatling, LoadRunner / SoapUI
+* Vieillissement, ...
 
 
 == Conclusion
