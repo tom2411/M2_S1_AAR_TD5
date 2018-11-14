@@ -14,7 +14,7 @@ Le mauvais testeur... il teste aussi !
 image::archi-complete.png[scaledwidth=75%]
 
 Maintenant que nous maitrisons cette architecture,
-comment définir et écrire des tests unitaires ?
+comment définir et écrire des tests ?
 
 
 
@@ -31,6 +31,8 @@ unitaires ; Cela exclut l’utilisation de Spring
 comparable à la production : ce sont les tests d’intégration ;
 Cela inclut l’utilisation de Spring, sans doute avec une
 configuration d’infrastructure spécifique
+
+ifdef::backend-revealjs[== !]
 
 Les tests unitaires et les tests d’intégration ne sont pas
 exclusifs : il faut utiliser les deux conjointement pour
@@ -58,11 +60,15 @@ du code
 ** Garantissent le bon respect des règles métier
 ** Facilitent le refactoring
 
+ifdef::backend-revealjs[== !]
+
 * Ils permettent également de coder plus efficacement
 ** L’automatisation permet un feedback rapide
 ** Permet de corriger un bug juste après l’avoir causé
 ** Evite de polluer l’application et d’impacter les autres
 développeurs
+
+ifdef::backend-revealjs[== !]
 
 Spring permet d’améliorer la conception des tests
 unitaires et propose un excellent support des tests
@@ -77,12 +83,11 @@ Sur le modèle [POJO] : simple, mais intérêt ?
 
 == Rappels : JUnit 4.X - @Test
 
-Mark your test cases with @Test annotations. You
-don’t need to prefix your test cases with “test”. In
-addition, your class does not need to extend from
-“TestCase” class.
+Simple : flag des cas de test avec l'annotation @Test
 
 [source,java]
+----
+public class QuelquesTests {
 @Test
 public void addition() {
     assertEquals(12, simpleMath.add(7, 5));
@@ -91,16 +96,16 @@ public void addition() {
 public void subtraction() {
     assertEquals(9, simpleMath.substract(12, 3));
 }
-
+...
+----
 
 == JUnit 4 - @Before and @After
 
-
-Use @Before and @After annotations for “setup”
-and “tearDown” methods respectively. They run
-before and after every test case.
+Les méthodes annotées @Before et @After sont lancées avant et après
+chaque cas de test.
 
 [source,java]
+----
 @Before
 public void runBeforeEveryTest() {
 simpleMath = new SimpleMath();
@@ -109,16 +114,16 @@ simpleMath = new SimpleMath();
 public void runAfterEveryTest() {
 simpleMath = null;
 }
+----
 
 
 == JUnit 4 – @BeforeClass and @AfterClass
 
-Use @BeforeClass and @AfterClass annotations for
-class wide “setup” and “tearDown” respectively.
-Think them as one time setup and tearDown. They
-run for one time before and after all test cases.
+Les méthodes annotées @BeforeClass et @AfterClass sont lancées *une seule fois* avant et après
+chaque test cases.
 
 [source,java]
+----
 @BeforeClass
 public static void runBeforeClass() {
     // run for one time before all test cases
@@ -127,34 +132,35 @@ public static void runBeforeClass() {
 public static void runAfterClass() {
     // run for one time after all test cases
 }
+----
 
 
 == JUnit 4 - Exception Handling
 
-Use “expected” paramater with @Test annotation
-for test cases that expect exception. Write the class
-name of the exception that will be thrown.
+Pour vérifier qu'une exception est bien levée, on ajoute "expected" dans l'annotation @Test
+
 [source,java]
+----
 @Test(expected = ArithmeticException.class)
 public void divisionWithException() {
     // divide by zero
     simpleMath.divide(1, 0);
 }
+----
 
 
 == JUnit 4 - @Ignore
 
-Put @Ignore annotation for test cases you want to
-ignore. You can add a string parameter that defines
-the reason of ignorance if you want.
+@Ignore pour ignorer un test
+
 [source,java]
+----
 @Ignore("Not Ready to Run")
 @Test
 public void multiplication() {
     assertEquals(15, simpleMath.multiply(3, 5));
 }
-
-
+----
 
 == JUnit 4 - Timeout
 
@@ -162,19 +168,17 @@ Define a timeout period in milliseconds with
 “timeout” parameter. The test fails when the
 timeout period exceeds.
 [source,java]
+----
 @Test(timeout = 1000)
 public void infinity() {
 while (true) ;
 }
+----
 
 
 == JUnit 4 - New Assertions
 
-New Assertions
-
-Compare arrays with new assertion methods. Two arrays
-are equal if they have the same length and each element is
-equal to the corresponding element in the other array
+Comparaison de tableaux/collections : si leurs tailles et élements sont equals
 
 [source,java]
 ----
@@ -191,6 +195,7 @@ public void listEquality() {
 == Exemple simple
 
 [source,java]
+----
 import static org.junit.Assert.*; …
 public class PileEntierTest {
   private PileEntier pile;
@@ -207,6 +212,8 @@ public class PileEntierTest {
   public void testPop() throws PileException{
     pile.pop();
   }
+----
+
 
 == Exécution des tests
 
@@ -220,7 +227,6 @@ Maven : mvn test
 * Tests modèle : aucun intérêt (en général)
 * Tests DAO : TU nécessaires
 ** Mais dépendance à la couche sous-jacente (JPA/EntityManager/BD)
-
 * Tests de type JUnit dans DAO
 ** Injection d’une contexte spécifique pour les tests (BD
 mémoire genre H2)
@@ -229,6 +235,7 @@ src/test/java et src/test/resources
 
 
 == Des Stubs ou des Mocks ?
+
 En Français on confond les deux termes sous le nom de
 «bouchon»
 
@@ -252,8 +259,9 @@ spécifique dans src/test/resource
 
 Dans la config :
 [source,xml]
+----
 <!-- H2 dataSource for testing environnement -->
-<bean id="dataSource«
+<bean id="dataSource"
 class="org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy">
 <constructor-arg>
 <bean class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
@@ -262,21 +270,26 @@ class="org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy">
 </bean>
 </constructor-arg>
 </bean>
+----
 
 == Configuration de la BD pour tests
 
 Script SQL de définition des données : banquetest.sql
 
 [source,sql]
+----
 INSERT INTO `client` VALUES
 (1003,'Orléans','Martin','Paul'),(1015,'Olivet','Dupont'
 ,'Sylvie'),(1109,'La ferté','Dupond','Henri');
 INSERT INTO `compte` VALUES (198,'2010-0131',2300,1003),(203,'2001-07-05',5440,1015),(243,'201312-25',450,1109);
 INSERT INTO `livret` VALUES (205,'2011-0705',655,1015,0.05);
+----
+
 
 == Run du script pour les tests
 
 [source,java]
+----
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations={"/spring-test.xml"})
 @Transactional
@@ -291,11 +304,13 @@ AbstractTransactionalJUnit4SpringContextTests {
     setDataSource(dataSrc);
     super.executeSqlScript("classpath:banque-test.sql", false);
   }
+----
 
 
 == Run du script pour les tests
 
 [source,java]
+----
   // Utility method
   protected void flush() {
     em.flush();
@@ -307,10 +322,12 @@ AbstractTransactionalJUnit4SpringContextTests {
     this.dataSrc = dataSrc;
   }
 }
+----
 
 == Et puis les tests
 
 [source,java]
+----
 public class ClientDaoTest extends AbstractDaoTest {
   @Resource
   private ClientDao clientDao;
@@ -324,10 +341,12 @@ public class ClientDaoTest extends AbstractDaoTest {
     assertEquals("nom", "Dupont", client.getNom());
   }
 ...
+----
 
 == Et puis les tests
 
 [source,java]
+----
 @Test
 public void testNbComptes() {
   Client client = clientDao.find(1015L);
@@ -343,13 +362,13 @@ public void testRemove() {
 }
 …
 }
+----
 
 == Tests DAO
 
-Ok mais je fais comment avec les id @GeneratedValue ????
-
 [%step]
-=> utilisation EntityManager en natif
+* Ok mais je fais comment avec les id @GeneratedValue ????
+* utilisation EntityManager en natif
 
 
 == Tests
@@ -364,6 +383,7 @@ principe des TU
 * Idée : injection de « fake » DAO dans la couche de
 service pour de vrais TU
 ** Génération à partir des interfaces de la DAO
+
 
 == Tests multi-couches
 
@@ -443,14 +463,35 @@ definitions
 expect(propertyDAO.getProperty("key"))
 .andReturn(property).times(2)
 
+== Tests Spring MVC
 
-== RÉFLEXIONS
-SUR LES ARCHITECTURES JEE
+De nombreuses fonctionnalités offertes par Spring MVC pour les tests Web
+
+[source,java]
+----
+@RunWith(SpringRunner.class)
+@WebMvcTest(HomeController.class)
+public class HomeControllerTest { // Web test for HomeController
+    @Autowired
+    private MockMvc mockMvc;  // Injects MockMvc
+
+    @Test
+    public void testHomePage() throws Exception {
+        mockMvc.perform(get("/"))
+            .andExpect(status().isOk()) // Expects HTTP 200
+            .andExpect(view().name("home"))
+            .andExpect(content().string(
+                containsString("Welcome to...")));
+    }
+}
+----
+
+
 
 == Conclusion
 
 Plusieurs manières d’architecturer son code dans une
-appli JEE (6-7)/ Spring
+appli JEE / Spring
 
 Architecture n-tiers (n=6 ou 5,6,7,8…)
 
@@ -460,70 +501,4 @@ la valeur de n
 JEE7 : couverture complète : JSF front end, EJB
 services, …
 
-== Pratiques actuelles
-
-* Une archi JEE/Spring utilisée pour le back-end uniquement
-* HTML5/CSS3/JS en Front-end
-* Utilisation de librairies JS pour réduire les couts de
-dev/maintenance (Angular X, Vue.js, React,...)
-
-== Style Horizontal
-
-== Horizontal
-
-[source,java]
-@Named
-@Stateful
-@ConversationScoped
-public class BookBean implements Serializable {
-  @Inject
-  private Conversation conversation;
-  @PersistenceContext(unitName = "sampleJavaEEHorizontalPU", type =
-  PersistenceContextType.EXTENDED)
-  private EntityManager em;
-  public Book findById(Long id) {
-    return em.find(Book.class, id);
-  }
-  public String update() {
-    conversation.end();
-    try {
-      if (id == null) {
-        em.persist(book);
-        return "search?faces-redirect=true";
-      } else {
-        em.merge(book);
-        return "view?faces-redirect=true&id=" + book.getId();
-      }
-    } catch (Exception e) {
-      FacesContext.getCurrentInstance().addMessage(null, new
-      FacesMessage(e.getMessage()));
-    return null;
-  }
-}
-
-== Horizontal
-
-[source,java]
-----
-@Transactional
-@Path("/books")
-public class BookEndpoint {
-  @PersistenceContext(unitName = "sampleJavaEEHorizontalPU")
-  private EntityManager em;
-  @GET
-  @Path("/{id:[0-9][0-9]*}")
-  @Produces("application/xml")
-  public Response findById(@PathParam("id") Long id) {
-    TypedQuery findByIdQuery = em
-        .createQuery("SELECT DISTINCT b FROM
-        Book b LEFT JOIN FETCH b.authors WHERE b.id = :entityId ORDER BY b.id",
-        Book.class);
-    findByIdQuery.setParameter("entityId", id);
-    Book entity = findByIdQuery.getSingleResult();
-    if (entity == null) {
-      return Response.status(Status.NOT_FOUND).build();
-    }
-  return Response.ok(entity).build();
-}
-----
 
