@@ -1,6 +1,6 @@
 = AAR TP8 : Tests
 Frédéric Moal <frederic.moal@univ-orleans.fr>
-v1.0, 2017-10-26: une première version
+v1.1, 2018-10-26: migration Spring 5
 ifndef::imagesdir[:imagesdir: ../images]
 ifndef::sourcedir[:sourcedir: ../../java]
 ifndef::resourcesdir[:resourcesdir: ../../resources]
@@ -9,7 +9,7 @@ ifndef::resourcesdir[:resourcesdir: ../../resources]
 == Architecture standard avec Spring
 
 Le but de ce TP est de mettre en place des Tests sur l'ensemble
-des couches développées dans le TP précédent :
+des couches développées dans les TPs précédents :
 
 image::tp3-arch1.png[]
 
@@ -20,7 +20,7 @@ pour la base de données - vous allez utiliser H2, une BD SQL Java en mémoire,
 qui va nous permettre de ré-initialiser facilement l'état de la base
 avant chaque test.
 
-Dans le pom.xml, ajoutez la dépendance à H2 (com.h2database),
+Reprendre le TP 6 [spring en config XML] et dans le pom.xml, ajoutez la dépendance à H2 (com.h2database),
 à spring-test (org.springframework)
 et à junit (4) [attention, en scope test !]
 
@@ -29,13 +29,13 @@ et à junit (4) [attention, en scope test !]
     <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-test</artifactId>
-        <version>4.1.1.RELEASE</version>
+        <version>5.0.1.RELEASE</version>
         <scope>test</scope>
     </dependency>
     <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>4.11</version>
+        <version>4.12</version>
         <scope>test</scope>
     </dependency>
     <dependency>
@@ -182,7 +182,7 @@ Ajoutez EasyMock (org.easymock) aux dépendances du pom.xml
     <dependency>
         <groupId>org.easymock</groupId>
         <artifactId>easymock</artifactId>
-        <version>3.2</version>
+        <version>3.5.1</version>
         <scope>test</scope>
     </dependency>
 

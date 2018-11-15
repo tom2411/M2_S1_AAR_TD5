@@ -4,6 +4,9 @@ v2.0, 2018-11-06: nouveau sujet
 ifndef::imagesdir[:imagesdir: ../images]
 ifndef::sourcedir[:sourcedir: ../../java]
 ifndef::resourcesdir[:resourcesdir: ../../resources]
+ifndef::masterdoc[]
+:doctype: article
+endif::masterdoc[]
 
 
 == Pré-requis
