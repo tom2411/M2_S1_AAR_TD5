@@ -19,6 +19,7 @@ COC poussé
 === Démarrage
 
 Création d'un projet :
+
 * Page web http://start.spring.io
 * Depuis une commande curl
 * en utilisant Spring Boot command-line interface
@@ -133,19 +134,20 @@ Exemple avec Hibernate => EclipseLink
 [source,xml]
 ----
 <dependency>
-<groupId>org.springframework.boot</groupId>
-<artifactId>spring-boot-starter-data-jpa</artifactId>
-<exclusions>
-<exclusion>
-<artifactId>hibernate-entitymanager</artifactId>
-<groupId>org.hibernate</groupId>
-</exclusion>
-</exclusions>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-data-jpa</artifactId>
+  <exclusions>
+    <exclusion>
+      <artifactId>hibernate-entitymanager</artifactId>
+      <groupId>org.hibernate</groupId>
+    </exclusion>
+  </exclusions>
 </dependency>
+
 <dependency>
-<groupId>org.eclipse.persistence</groupId>
-<artifactId>eclipselink</artifactId>
-<version>2.5.2</version>
+  <groupId>org.eclipse.persistence</groupId>
+  <artifactId>eclipselink</artifactId>
+  <version>2.5.2</version>
 </dependency>
 ----
 
@@ -168,8 +170,8 @@ Utilise SpringBoot, ajout d'une dépendance starter, eg JPA :
 [source, xml]
 ----
 <dependency>
-<groupId>org.springframework.boot</groupId>
-<artifactId>spring-boot-starter-data-jpa</artifactId>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
 </dependency>
 ----
 
@@ -200,21 +202,20 @@ public interface ClientRepository extends CrudRepository<Client,Long> {
 
 [source,java]
 ----
-    @Bean
-    public CommandLineRunner demo(ClientRepository repository) {
-        return (args) -> {
-            repository.save(new Client("Jack", "Bauer"));
-            repository.save(new Client("Chloe", "O'Brian"));
-            repository.save(new Client("Kim", "Bauer"));
+@Bean
+public CommandLineRunner demo(ClientRepository repository) {
+  return (args) -> {
+      repository.save(new Client("Jack", "Bauer"));
+      repository.save(new Client("Chloe", "O'Brian"));
+      repository.save(new Client("Kim", "Bauer"));
 
-            for (Client Client : repository.findAll()) {
-                log.info(Client.toString());
-            }
-
-            repository.findByNom("Bauer").forEach(bauer -> {
-                log.info(bauer.toString());
-            });
-        };
+      for (Client Client : repository.findAll()) {
+            log.info(Client.toString());
+      }
+      repository.findByNom("Bauer").forEach(bauer -> {
+            log.info(bauer.toString());
+      });
+};
 ----
 
 
