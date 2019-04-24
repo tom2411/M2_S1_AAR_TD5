@@ -280,5 +280,8 @@ depuis Eclipse/IntelliJ.
 include::{resourcesdir}/albums.sql[]
 ----
 
-Créez un nouveau projet JPA « vide », avec un profil EclipseLink 2.5 et utilisez la base de données albums (obtenue en lançant le script albums.sql) pour générer automatiquement les classes Java. Pour cela, utilisez l'assistant du menu JPA du projet.
+Créez un nouveau projet JPA « vide », avec un profil EclipseLink 2.5
+et utilisez la base de données albums (obtenue en lançant le script albums.sql)
+pour générer automatiquement les classes Java.
+Pour cela, utilisez l'assistant du menu JPA du projet.
 

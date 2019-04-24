@@ -34,13 +34,13 @@ ifdef::backend-pdf[]
 
 :leveloffset: +2
 
-include::tp/tp1.adoc[]
+include::../tp/tp1.adoc[]
 
-include::tp/tp2.adoc[]
+include::../tp/tp2.adoc[]
 
-include::tp/tp3.adoc[]
+include::../tp/tp3.adoc[]
 
-include::tp/tp4.adoc[]
+include::../tp/tp4.adoc[]
 
 :leveloffset: -2
 

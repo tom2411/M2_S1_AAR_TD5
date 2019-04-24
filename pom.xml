@@ -24,7 +24,7 @@
         <jruby.version>9.2.6.0</jruby.version>
         <revealjs.version>3.5.0</revealjs.version>
         <asciidoctor-revealjs.version>1.0.4</asciidoctor-revealjs.version>
-        <asciidoctorj.pdf.version>1.5.0-alpha.16</asciidoctorj.pdf.version>
+        <asciidoctorj.pdf.version>1.5.0-alpha.17</asciidoctorj.pdf.version>
         <asciidoctorj.diagram.version>1.5.10</asciidoctorj.diagram.version>
 
         <project.slides.directory>${project.build.directory}/generated-slides</project.slides.directory>
@@ -174,6 +174,7 @@
                             <goal>process-asciidoc</goal>
                         </goals>
                         <configuration>
+                            <sourceDirectory>src/main/asciidoc/cours</sourceDirectory>
                             <outputDirectory>${project.slides.directory}</outputDirectory>
                             <backend>revealjs</backend>
                             <templateDir>${project.build.directory}/asciidoctor-reveal.js-${asciidoctor-revealjs.version}/templates/slim</templateDir>
@@ -183,10 +184,6 @@
                                 <resource>
                                     <!-- (Mandatory) Directory to copy from. Paths are relative to maven's ${baseDir} -->
                                     <directory>src/main/asciidoc</directory>
-                                    <!-- (Optional) NOTE: SVN, GIT and other version control files are excluded by default, there's no need to add them -->
-                                    <excludes>
-                                        <exclude>**/tp*.adoc</exclude>
-                                    </excludes>
                                 </resource>
                             </resources>
                             <attributes>
@@ -205,7 +202,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>generate-pdf-doc</id>
+                        <id>generate-pdf-cours</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>process-asciidoc</goal>
@@ -213,16 +210,43 @@
                         <configuration>
                             <backend>pdf</backend>
                             <sourceHighlighter>coderay</sourceHighlighter>
-                            <sourceDirectory>src/main/asciidoc</sourceDirectory>
+                            <sourceDirectory>src/main/asciidoc/cours</sourceDirectory>
+                            <!--<sourceDocumentName>index.adoc</sourceDocumentName>-->
                             <requires>
                                 <require>asciidoctor-diagram</require>
                             </requires>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/asciidoc</directory>
+                                </resource>
+                            </resources>
                             <attributes>
                                 <icons>font</icons>
 <!--
                                 <pagenums/>
                                 <toc/>
 -->
+                                <idprefix/>
+                                <idseparator>-</idseparator>
+                                <imagesdir>${project.build.directory}/generated-docs/images</imagesdir>
+                            </attributes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-pdf-tp</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>process-asciidoc</goal>
+                        </goals>
+                        <configuration>
+                            <backend>pdf</backend>
+                            <sourceHighlighter>coderay</sourceHighlighter>
+                            <sourceDirectory>src/main/asciidoc/tp</sourceDirectory>
+                            <requires>
+                                <require>asciidoctor-diagram</require>
+                            </requires>
+                            <attributes>
+                                <icons>font</icons>
                                 <idprefix/>
                                 <idseparator>-</idseparator>
                                 <imagesdir>${project.build.directory}/generated-docs/images</imagesdir>
