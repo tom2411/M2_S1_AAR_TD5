@@ -3,9 +3,13 @@ ifndef::masterdoc[]
 include::_header.adoc[]
 endif::masterdoc[]
 
-Le bon testeur, il teste
-
+> Le bon testeur, il teste.
 Le mauvais testeur... il teste aussi !
+
+[%notitle]
+== !
+
+image::code.jpg[background, size=contain]
 
 
 == Problématique
@@ -25,7 +29,7 @@ comment définir et écrire des tests ?
 
 ** Test d’un composant unique (métier ou technique), en
 isolation du reste des autres composants : ce sont les tests
-unitaires ; Cela exclut l’utilisation de Spring
+unitaires ; Cela "exclut" l’utilisation de Spring
 
 ** Test d’un ensemble de composants dans un environnement
 comparable à la production : ce sont les tests d’intégration ;
@@ -36,7 +40,7 @@ ifdef::backend-revealjs[== !]
 
 Les tests unitaires et les tests d’intégration ne sont pas
 exclusifs : il faut utiliser les deux conjointement pour
-bien tester
+_bien_ tester
 
 
 == Objectifs des tests
@@ -48,7 +52,7 @@ de bien tester les lignes de code importantes
 ** Si une méthode utilise des branchements conditionnels, il
 faut valider tous les cas possibles
 
-* Ces tests doivent être rapides et automatisés
+* Ces tests doivent être rapides et *automatisés*
 ** Un jeu de test qui dure longtemps ne sera jamais
 exécuté par les développeurs : son utilité est donc nulle
 
@@ -74,14 +78,12 @@ Spring permet d’améliorer la conception des tests
 unitaires et propose un excellent support des tests
 d’intégration
 
-== Tests UNITAIRES
-
-Test unitaire JUnit
+== Tests JUnit
 
 Sur le modèle [POJO] : simple, mais intérêt ?
 
 
-== Rappels : JUnit 4.X - @Test
+=== JUnit 4.X - @Test
 
 Simple : flag des cas de test avec l'annotation @Test
 
@@ -99,7 +101,7 @@ public void subtraction() {
 ...
 ----
 
-== JUnit 4 - @Before and @After
+=== JUnit 4 - @Before and @After
 
 Les méthodes annotées @Before et @After sont lancées avant et après
 chaque cas de test.
@@ -117,7 +119,7 @@ simpleMath = null;
 ----
 
 
-== JUnit 4 – @BeforeClass and @AfterClass
+=== JUnit 4 – @BeforeClass and @AfterClass
 
 Les méthodes annotées @BeforeClass et @AfterClass sont lancées *une seule fois* avant et après
 chaque test cases.
@@ -135,7 +137,7 @@ public static void runAfterClass() {
 ----
 
 
-== JUnit 4 - Exception Handling
+=== JUnit 4 - Exception Handling
 
 Pour vérifier qu'une exception est bien levée, on ajoute "expected" dans l'annotation @Test
 
@@ -149,7 +151,7 @@ public void divisionWithException() {
 ----
 
 
-== JUnit 4 - @Ignore
+=== JUnit 4 - @Ignore
 
 @Ignore pour ignorer un test
 
@@ -162,7 +164,7 @@ public void multiplication() {
 }
 ----
 
-== JUnit 4 - Timeout
+=== JUnit 4 - Timeout
 
 Define a timeout period in milliseconds with
 “timeout” parameter. The test fails when the
@@ -176,7 +178,7 @@ while (true) ;
 ----
 
 
-== JUnit 4 - New Assertions
+=== JUnit 4 - New Assertions
 
 Comparaison de tableaux/collections : si leurs tailles et élements sont equals
 
@@ -192,7 +194,7 @@ public void listEquality() {
 }
 ----
 
-== Exemple simple
+=== Exemple simple
 
 [source,java]
 ----
@@ -214,16 +216,113 @@ public class PileEntierTest {
   }
 ----
 
+== AssertJ
+
+Librairie d'assertions en version _fluent_
+
+Dépendance maven :
+----
+<dependency>
+  <groupId>org.assertj</groupId>
+  <artifactId>assertj-core</artifactId>
+  <version>3.13.2</version>
+  <scope>test</scope>
+</dependency>
+----
+
+
+=== AssertJ : assertThat
+
+----
+import static org.assertj.core.api.Assertions.*;
+
+assertThat(objectUnderTest). // code completion
+----
+
+=== AssertJ exemples
+
+[source,java]
+----
+// basic assertions
+assertThat(frodo.getName()).isEqualTo("Frodo");
+assertThat(frodo).isNotEqualTo(sauron);
+
+// chaining string specific assertions
+assertThat(frodo.getName()).startsWith("Fro")
+                           .endsWith("do")
+                           .isEqualToIgnoringCase("frodo");
+
+// collection specific assertions (there are plenty more)
+// in the examples below fellowshipOfTheRing is a List<TolkienCharacter>
+assertThat(fellowshipOfTheRing).hasSize(9)
+                               .contains(frodo, sam)
+                               .doesNotContain(sauron);
+
+// as() is used to describe the test and will be shown before the error message
+assertThat(frodo.getAge()).as("check %s's age", frodo.getName()).isEqualTo(33);
+
+// exception assertion, standard style ...
+assertThatThrownBy(() -> { throw new Exception("boom!"); }).hasMessage("boom!");
+// ... or BDD style
+Throwable thrown = catchThrowable(() -> { throw new Exception("boom!"); });
+assertThat(thrown).hasMessageContaining("boom");
+
+// using the 'extracting' feature to check fellowshipOfTheRing character's names
+assertThat(fellowshipOfTheRing).extracting(TolkienCharacter::getName)
+                               .doesNotContain("Sauron", "Elrond");
+
+// extracting multiple values at once grouped in tuples
+assertThat(fellowshipOfTheRing).extracting("name", "age", "race.name")
+                               .contains(tuple("Boromir", 37, "Man"),
+                                         tuple("Sam", 38, "Hobbit"),
+                                         tuple("Legolas", 1000, "Elf"));
+
+// filtering a collection before asserting
+assertThat(fellowshipOfTheRing).filteredOn(character -> character.getName().contains("o"))
+                               .containsOnly(aragorn, frodo, legolas, boromir);
+
+// combining filtering and extraction (yes we can)
+assertThat(fellowshipOfTheRing).filteredOn(character -> character.getName().contains("o"))
+                               .containsOnly(aragorn, frodo, legolas, boromir)
+                               .extracting(character -> character.getRace().getName())
+                               .contains("Hobbit", "Elf", "Man");
+----
+
+=== Exemple : test d'une fabrique de pizza
+
+image::pizza.png[Pizza]
+
+=== DDD
+
+[source,java]
+----
+include::{testsourcedir}/FabriquePizzaTest.java[tags=tests,indent=0]
+----
+
+=== code ?
+
+[source,java]
+----
+include::{testsourcedir}/FabriquePizzaTest.java[tags=code,indent=0]
+----
+
+=== source
+
+https://assertj.github.io/doc/
+
 
 == Exécution des tests
 
 Run as… -> JUnit Test
+
+dans le code
 
 Maven : mvn test
 
 
 == Et dans une archi n-tiers ?
 
+[%step]
 * Tests modèle : aucun intérêt (en général)
 * Tests DAO : TU nécessaires
 ** Mais dépendance à la couche sous-jacente (JPA/EntityManager/BD)
@@ -234,14 +333,17 @@ mémoire genre H2)
 src/test/java et src/test/resources
 
 
-== Des Stubs ou des Mocks ?
+=== Des Stubs ou des Mocks ?
 
 En Français on confond les deux termes sous le nom de
-«bouchon»
+«bouchons»
 
 Ils sont nécessaires pour tester les dépendances, en
 particulier celles injectées par Spring
 
+ifdef::backend-revealjs[=== Bouchons]
+
+[%step]
 * Un *Stub* : une implémentation «vide» d’une
 dépendance
 ** Exemple : pour un DAO, faire une implémentation qui
@@ -252,10 +354,10 @@ librairie spécialisée, qui la crée à la volée en fonction
 de l’interface à respecter
 
 
-== Injection de contexte spécifique
+=== Injection de contexte spécifique
 
 Spring : définition d’un fichier XML de config
-spécifique dans src/test/resource
+spécifique dans `src/test/resources`
 
 Dans la config :
 [source,xml]
@@ -272,9 +374,9 @@ class="org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy">
 </bean>
 ----
 
-== Configuration de la BD pour tests
+=== Configuration de la BD pour tests
 
-Script SQL de définition des données : banquetest.sql
+Script SQL de définition des données : `banquetest.sql`
 
 [source,sql]
 ----
@@ -285,8 +387,10 @@ INSERT INTO `compte` VALUES (198,'2010-0131',2300,1003),(203,'2001-07-05',5440,1
 INSERT INTO `livret` VALUES (205,'2011-0705',655,1015,0.05);
 ----
 
+[WARNING]
+connaissance de la structure de la BD
 
-== Run du script pour les tests
+=== Run du script pour les tests
 
 [source,java]
 ----
@@ -307,7 +411,7 @@ AbstractTransactionalJUnit4SpringContextTests {
 ----
 
 
-== Run du script pour les tests
+=== Run du script pour les tests
 
 [source,java]
 ----
@@ -324,7 +428,7 @@ AbstractTransactionalJUnit4SpringContextTests {
 }
 ----
 
-== Et puis les tests
+=== Et puis les tests
 
 [source,java]
 ----
@@ -343,7 +447,7 @@ public class ClientDaoTest extends AbstractDaoTest {
 ...
 ----
 
-== Et puis les tests
+=== Et puis les tests
 
 [source,java]
 ----
@@ -364,7 +468,7 @@ public void testRemove() {
 }
 ----
 
-== Tests DAO
+=== Tests DAO
 
 [%step]
 * Ok mais je fais comment avec les id @GeneratedValue ????
@@ -385,7 +489,7 @@ service pour de vrais TU
 ** Génération à partir des interfaces de la DAO
 
 
-== Tests multi-couches
+=== Tests multi-couches
 
 * Fake/Simulacre = Mock
 ** Génération des mocks le + automatisé possible
@@ -396,7 +500,7 @@ sinon aucun intérêt
 à partir d’une interface Java
 
 
-== EasyMock : exemple simple
+=== EasyMock : exemple simple
 
 [source,java]
 ----
@@ -415,9 +519,10 @@ public class ConfigurationManagerImplTest {
   }
 ----
 
-== EasyMock : exemple simple
+=== EasyMock : exemple simple
 
 [source,java]
+----
 @Test
 public void getProperty() {
   // déf. du comportement
@@ -433,11 +538,12 @@ public void getProperty() {
     .andStubReturn(defaultProperty);
   replay(propertyDAO);
 // fin de l’enreg du comportement
+----
 
-
-== EasyMock : exemple simple
+=== EasyMock : exemple simple
 
 [source,java]
+----
 // démarrage du test
 Property test = configurationManager.getProperty("key");
 assertEquals("value", test.getValue());
@@ -446,8 +552,9 @@ assertEquals("default", test.getValue());
 // vérifie que toutes les méthodes du mock ont bien été appelées
 verify(propertyDAO);
 }
+----
 
-== EasyMock
+=== EasyMock
 
 * Mock avec contraintes
 ** Sur le nombre de fois où les méthodes sont appelées

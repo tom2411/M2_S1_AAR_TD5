@@ -309,11 +309,13 @@ Propose du typage statique pour les requêtes
 === QueryDSL : exemple
 
 [source,java]
+----
 @Entity
 public class Customer {
     private String firstName;
     private String lastName;
 }
+----
 
 Querydsl génère une classe QCustomer dans le même package qui contient le typage statique
 pour les requêtes
