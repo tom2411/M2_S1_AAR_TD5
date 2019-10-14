@@ -46,6 +46,7 @@ image::tp1-archi1.png[scaledwidth=100%]
 * le driver JDBC MySQL pour accéder à la base (mysql:mysql-connector-java:8.0.12)
 * le gestionnaire de persistence JPA, ici eclipseLink : org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.3
 * définissez les sources du projet en java 8 :
++
 [source,xml]
 ----
     <properties>
@@ -56,6 +57,7 @@ image::tp1-archi1.png[scaledwidth=100%]
 ----
 
 . Créez les classes [persistantes] Client, Compte, Livret dans un package modele :
++
 [source,java]
 public class Client {
     private long id;
@@ -81,6 +83,7 @@ public class Livret extends Compte {
  Utilisez pour cela la refcardZ rc022-JPA_Online.pdf
 
 . Ajoutez dans resources : META-INF/persistence.xml
++
 [source,xml]
 ----
 <?xml version="1.0" encoding="UTF-8"?>
@@ -136,6 +139,7 @@ image::tp1-archi2.png[scaledwidth=100%]
 (org.hibernate:hibernate-entitymanager:4.3.7.Final) et MySQL pour le Driver JDBC.
 
 . Recopiez le code (classes du modele) du projet précédent dans ce nouveau projet et modifiez le provider de persistance par Hibernate :
++
 [source,xml]
 ----
 <?xml version="1.0" encoding="UTF-8"?>
@@ -166,13 +170,16 @@ image::tp1-archi2.png[scaledwidth=100%]
 ----
 
 . Ajoutez une couche DAO, séparée en 3 interfaces : ClientDao, CompteDao, LivretDao ; chaque Dao offrira au minimum les méthodes suivantes :
++
 [source,java]
+----
 public void create(T entity);
 public void edit(T entity);
 public void remove(T entity);
 public T find(Object id);
 public List<T> findAll();
 public int count();
+----
 
 . Testez cette architecture avec ce nouveau provider, en écrivant un Main qui fait appel à la DAO que vous devrez instancier à la main.
 
