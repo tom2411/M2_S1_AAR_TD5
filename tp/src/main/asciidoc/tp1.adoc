@@ -17,7 +17,7 @@ Nous allons tester l'implémentation de référence de JPA 2.2, EclipseLink, pui
 
 Avoir un vrai SGBD installé, on utilisera MySQL(MySQL 5.X, X>0)
 
-* Avec docker : https://hub.docker.com/_/mysql/
+* Avec docker : link:https://hub.docker.com/\_/mysql/[https://hub.docker.com/_/mysql/]
 +
 [source,bash]
 docker run --name mysql -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 -d mysql
