@@ -20,12 +20,12 @@ Avoir un vrai SGBD installé, on utilisera MySQL(MySQL 5.X, X>0)
 * Avec docker : link:https://hub.docker.com/\_/mysql/[https://hub.docker.com/_/mysql/]
 +
 [source,bash]
-docker run --name mysql -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 -d mysql
+docker run --name mysql -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 -d mysql:5
 
 * Pour lancer un client Mysql avec docker :
 +
 [source,bash]
-docker run -it --link mysql:mysql --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD"'
+docker run -it --link mysql:mysql --rm mysql:5 sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD"'
 
 * [bof] Pour une install native :
 ** sous linux : `apt-get install mysql-server`
