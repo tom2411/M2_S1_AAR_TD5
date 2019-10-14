@@ -18,14 +18,16 @@ Nous allons tester l'implémentation de référence de JPA 2.2, EclipseLink, pui
 Avoir un vrai SGBD installé, on utilisera MySQL(MySQL 5.X, X>0)
 
 * Avec docker : https://hub.docker.com/_/mysql/
++
 [source,bash]
 docker run --name mysql -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 -d mysql
 
-** Pour lancer un client Mysql avec docker :
+* Pour lancer un client Mysql avec docker :
++
 [source,bash]
 docker run -it --link mysql:mysql --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD"'
 
-* Pour une install native :
+* [bof] Pour une install native :
 ** sous linux : `apt-get install mysql-server`
 ** ou sous windows/mac... un W/LAMP (http://www.wampserver.com/) ou directement MySQL (http://www.mysql.org).
 
@@ -45,7 +47,7 @@ image::tp1-archi1.png[scaledwidth=100%]
 . Dans le pom.xml, ajoutez dans les dépendances ( http://search.maven.org ) :
 * le driver JDBC MySQL pour accéder à la base (mysql:mysql-connector-java:8.0.12)
 * le gestionnaire de persistence JPA, ici eclipseLink : org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.3
-* définissez les sources du projet en java 8 :
+* définissez les sources du projet en java 8 [ou 11]:
 +
 [source,xml]
 ----
@@ -76,13 +78,13 @@ public class Livret extends Compte {
     private double tauxInteret;
 }
 
-. Générez à l'aide des assistants les getters/setters/constructeurs par défaut/full.
+. Générez à l'aide des assistants les getters/setters/constructeurs par défaut/full [utilisez lombok].
 
 . Ajoutez les annotations minimales aux classes
  pour les rendre persistantes (Id, relations, types temporels…).
- Utilisez pour cela la refcardZ rc022-JPA_Online.pdf
+ Utilisez pour cela la link:rc022-JPA_Online.pdf[refcardZ JPA]
 
-. Ajoutez dans resources : META-INF/persistence.xml
+. Ajoutez dans le fichier de config de persistence : resources/META-INF/persistence.xml
 +
 [source,xml]
 ----
