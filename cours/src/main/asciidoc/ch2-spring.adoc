@@ -1463,11 +1463,12 @@ class="org.springframework.jdbc.datasource.DataSourceTransactionManager" >
 
 *  Utiliser les annotations
 [source,java]
+----
 @Transactional
 public void uneMethodeMetier() {
 // Unité de travail atomique
 }
-
+----
 
 === Fonctionnement dans Spring
 

@@ -135,6 +135,7 @@ hibernate.connection.username=login
 hibernate.connection.password=vide
 
 
+
 === Code de persistance
 
 [source,java]
@@ -499,6 +500,7 @@ public class User {...
 === JPA : exemple simple
 
 [source, java]
+----
 @Entity
 @Table(name = "personne")
 public class Person implements Serializable {
@@ -509,6 +511,7 @@ public class Person implements Serializable {
 	private String avatarUrl;
 	// getters et setters
 }
+----
 
 === JPA : mapping
 
@@ -791,11 +794,13 @@ private int laVersion;
 * Pratique car on ne veut pas toujours des collections d'objets complexes
 * Les objets sont stockés dans une « table de collection » (configurable avec @CollectionTable, sinon nommée <nom_entité>_<nom_attribut>)
 [source,java]
+----
 @Entity
 public class Person {
 	@ElementCollection
 	private Collection<String> emails;
 }
+----
 
 === JPA 2 : orphelins
 
@@ -970,9 +975,10 @@ Cette récupération étendue peut être nécessaire pour transmettre des objets
 
 === Lazy loadind en JPA
 
-* Définition globale dans l’annotation (Fetch), mais garder LAZY pour les collections
+* Définition globale dans l’annotation (Fetch) mais garder LAZY pour les collections
 
 * Utilisation dans une requête du « join fetch » pour forcer à ramener tout de suite les entités liées (en lazy, provoquera N select en plus sinon !!)
++
 [source, java]
 select e from Employe e join fetch e.departement
 
@@ -982,6 +988,24 @@ select e from Employe e join fetch e.departement
 ** https://www.javacodegeeks.com/2014/05/jpa-2-1-entity-graph-part-1-named-entity-graphs.html
 ** https://www.javacodegeeks.com/2014/05/jpa-2-1-entity-graph-part-2-define-lazyeager-loading-at-runtime.html
 
+=== Entity Graph (JPA >= 2.1)
+
+[source,java]
+----
+EntityGraph<Order> graph = this.em.createEntityGraph(Order.class);
+graph.addAttributeNodes("items");
+Map<String, Object> hints = new HashMap<String, Object>();
+hints.put("javax.persistence.loadgraph", graph);
+this.em.find(Order.class, orderId, hints);
+
+EntityGraph<Order> graph = this.em.createEntityGraph(Order.class);
+Subgraph<OrderItem> itemGraph = graph.addSubgraph("items");
+itemGraph.addAttributeNodes("product");
+Map<String, Object> hints = new HashMap<String, Object>();
+hints.put("javax.persistence.loadgraph", graph);
+
+return this.em.find(Order.class, orderId, hints);
+----
 
 
 === Les VO/DTO
@@ -1018,7 +1042,7 @@ Deux API de requête en JPA :
 
 Nécessité pour Criteria d’accès au Méta-modèle
 
-* Génération du méta-modèle à partir des classes du modèle (avec _, eg User.java -> User_.java)
+* Génération du méta-modèle à partir des classes du modèle (avec \_, eg User.java -> User_.java)
 * Attention avec Maven, ajout de la génération de ces classes (eg hibernate-jpamodelgen en dep)
 
 === JPA : méta-modèle Criteria
