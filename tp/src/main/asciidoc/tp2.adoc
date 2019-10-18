@@ -1,7 +1,7 @@
 = AAR TP6 : Intégration avec Spring
 Frédéric Moal <frederic.moal@univ-orleans.fr>
-v1.1, 2018-10-18: spring boot 2.0.6
-ifndef::imagesdir[:imagesdir: ../images]
+v1.2, 2019-10-18: spring boot 2.0.6
+ifndef::imagesdir[:imagesdir: ./images]
 ifndef::sourcedir[:sourcedir: ../java]
 ifndef::resourcesdir[:resourcesdir: ../resources]
 
@@ -19,11 +19,11 @@ image::tp2arch1.png[scaledwidth=100%]
 
 ** avec docker :
 [source,bash]
-docker run --name mysql -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 -d mysql
+docker run --name mysql -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 -d mysql:5
 
 ** Client Mysql avec docker :
 [source,bash]
-docker run -it --link mysql:mysql --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD"'
+docker run -it --link mysql:mysql --rm mysql:5 sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD"'
 
 
 == Exercice 1 : en config XML
@@ -204,7 +204,7 @@ Pour que cela fonctionne, il faut bien sûr ajouter les dépendances de Hibernat
 ----
 
 
-Pour tester tout ça, un petit programme Main ; à adapter en fonction de votre couche de Service évidemment :
+Pour tester tout ça, un petit programme Main ; *à adapter* en fonction de votre couche de Service évidemment :
 [source,java]
 ----
 package run;
