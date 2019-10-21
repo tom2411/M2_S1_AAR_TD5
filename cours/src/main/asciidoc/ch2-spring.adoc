@@ -108,8 +108,8 @@ ifdef::backend-revealjs[== !]
  
 == Spring : Architecture complète et modulaire
 
-[.thumb]
-image::spring-stack.png[scaledwidth=75%]
+[.big-image]
+image::spring-stack.png[]
 
 == Spring : organisation
 

@@ -16,6 +16,7 @@
         <asciidoctor-revealjs.version>2.0.0</asciidoctor-revealjs.version>
         <revealjs.version>3.8.0</revealjs.version>
         <project.slides.directory>${project.build.directory}/generated-slides</project.slides.directory>
+        <asciidoctorj-diagram.version>1.5.18</asciidoctorj-diagram.version>
     </properties>
     <dependencies>
         <dependency>
@@ -118,11 +119,23 @@
                         <artifactId>asciidoctorj-pdf</artifactId>
                         <version>${asciidoctorj.pdf.version}</version>
                     </dependency>
+                    <dependency>
+                        <groupId>org.asciidoctor</groupId>
+                        <artifactId>asciidoctorj-diagram</artifactId>
+                        <version>${asciidoctorj-diagram.version}</version>
+                    </dependency>
                 </dependencies>
                 <configuration>
                     <sourceDirectory>src/main/asciidoc</sourceDirectory>
+                    <requires>
+                        <require>asciidoctor-diagram</require>
+                        <!-- block extension to include c3js (line/spline/step/area/area-spline/area-step/bar/scatter/pie/donut/gauge) -->
+                        <require>./src/main/asciidoc/lib/c3js-block-macro.rb</require>
+                        <require>./src/main/asciidoc/lib/cloud-block-macro.rb</require>
+                    </requires>
                     <!-- Attributes common to all output formats -->
                     <attributes>
+                        <experimental/><!-- kbd / menu / btn macros -->
                         <sourcedir>${project.build.sourceDirectory}</sourcedir>
                         <project-version>${project.version}</project-version>
                     </attributes>
@@ -142,13 +155,12 @@
                             </requires>
                             <outputDirectory>${project.slides.directory}</outputDirectory>
                             <backend>revealjs</backend>
-                            <sourceHighlighter>rouge</sourceHighlighter>
+<!--                            <sourceHighlighter>rouge</sourceHighlighter>-->
                             <attributes>
-                                <!--
-                                    As we are downloading reveal.js in runtime, it sits in a nonstandard folder `reveal.js-${revealjs.version}`
-                                -->
                                 <revealjsdir>reveal.js-${revealjs.version}</revealjsdir>
                                 <!-- put here the reveal.js specific attributes -->
+                                <source-highlighter>highlightjs</source-highlighter>
+                                <highlightjs-theme>lib/highlight/styles/gruvbox-dark.min.css</highlightjs-theme>
                                 <sourcedir>${basedir}/src/main/java</sourcedir>
                                 <!--                            defined in the source
                                                                 <revealjs_theme>black</revealjs_theme>
@@ -160,6 +172,9 @@
                                 <!--                            defined in the source
                                 <customcss>styles/monokai.css</customcss>
                                 -->
+                                <revealjs_plugins>lib/revealjs-plugins/revealjs-plugins.js</revealjs_plugins>
+                                <revealjs_plugins_configuration>lib/revealjs-plugins/revealjs-plugins-conf.js</revealjs_plugins_configuration>
+
                             </attributes>
                         </configuration>
                     </execution>

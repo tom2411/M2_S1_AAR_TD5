@@ -6,11 +6,13 @@ endif::masterdoc[]
 
 == ORM ?
 
-Il y a des différences fondamentales entre un tuple dans une table et un objet d’une classe
+Il y a des différences fondamentales entre un tuple dans une table
+et un objet d’une classe
 
 * Pas d'héritage ou de polymorphisme en base de données
 * La gestion des associations est différente (one-to-many et many-to-many)
-* De nombreux types de données sont différents (eg il y a de nombreuses façons de stocker une String en base de données)
+* De nombreux types de données sont différents
+(eg il y a de nombreuses façons de stocker une String en base de données)
 * Les contraintes de validation ne sont pas gérées de la même manière
 
 
@@ -19,16 +21,18 @@ Le but de la solution d'O[R]M sera d'alléger ou de "simplifier" ces problèmes
 
 == Historique
 
-* 1994 : TopLink, premier ORM au monde, en SmallTalk
-* 1996 : TopLink propose une version Java
-* 1998 : EJB 1.0
-* 2000 : EJB 2.0
-* 2001 : lancement d’Hibernate, afin de proposer une alternative aux EJB 2
-* 2006 : EJB 3.0 et JPA 1.0
-* 2007 : TopLink devient EclipseLink
-* 2009 : JPA 2.0
-* 2013 : JPA 2.1
-* 2017 : JPA 2.2
+[.timeline]
+* *1994* - TopLink [SmallTalk]
+* *1996* - TopLink [en Java]
+* *1998* - EJB 1.0
+* *2000* - EJB 2.0
+* *2001* - Hibernate
+* *2006* - EJB 3.0 et JPA 1.0
+* *2007* - TopLink devient EclipseLink
+* *2009* - JPA 2.0
+* *2013* - JPA 2.1
+* *2017* - JPA 2.2
+
 
 == Les solutions pour le mapping O/R
 
@@ -58,6 +62,7 @@ Soutenu par Jboss/Red Hat, pas par Sun/Oracle
 Exemple : BooksShelf.hbm
 
 [source, xml]
+----
 <hibernate-mapping package="com.loginmag.hibernate">
   <class name="Book" table="books">
     <meta attribute="class-description">
@@ -82,17 +87,20 @@ Exemple : BooksShelf.hbm
     </property>
   </class>
 </hibernate-mapping>
+----
 
 === Génération du code java et bd
 
 A partir du fichier de mapping, il est possible de générer les classes :
-[source]
+[source,shell script]
+----
 java -classpath lib/hibernate2.jar:$CLASSPATH \
     net.sf.hibernate.tool.hbm2java.CodeGenerator \
 	-output=src BooksShelf.hbm
+----
 
 De même, outil de génération du schéma de la BD
-[source]
+[source,shell script]
 java -classpath hibernate2.jar:$CLASSPATH:lib/hsqldb.jar:bin \
  net.sf.hibernate.tool.hbm2ddl.SchemaExport BooksShelf.hbm
 
@@ -128,11 +136,13 @@ public class Book implements Serializable {
 Un fichier Hibernate.properties
 
 [source,properties]
+----
 hibernate.dialect=net.sf.hibernate.dialect.HSQLDialect
 hibernate.connection.driver_class=org.hsqldb.jdbcDriver
 hibernate.connection.url=jdbc:hsqldb:db/books
 hibernate.connection.username=login
 hibernate.connection.password=vide
+----
 
 
 
@@ -172,14 +182,19 @@ public class PersistData {
 
 Langage proche de SQL
 
-Définition : exemple
+Exemple :
+
+* Définition
++
 [source, xml]
+----
 <query name="books.booksByAuthor">
 <![CDATA[from demo.Book as book where book.author=:author]]>
 </query>
+----
 
-Utilisation
-
+* Utilisation
++
 [source,java]
 ----
 Query query = session.getNamedQuery("books.booksByAuthor");
@@ -207,7 +222,7 @@ Des caractéristiques très intéressantes (fetch plans, ..) mais ce
 framework n'a été que peu utilisé !
 
 
-=== Un processus d'ehancement
+=== Un processus d'enhancement
 
 image::jdo.png[]
 
@@ -341,11 +356,19 @@ Customer bob = queryFactory.selectFrom(customer)
 ifdef::backend-revealjs[=== !]
 
 * API fluent pour les requêtes :
++
 [source,java]
+----
 queryFactory.selectFrom(customer)
-    .where(customer.firstName.eq("Bob").and(customer.lastName.eq("Wilson")));
+    .where(
+        customer.firstName.eq("Bob")
+        .and(customer.lastName.eq("Wilson")
+        )
+        );
+----
 
 ** en JPQL, String (pas de type!)
++
 `select customer from Customer as customer
  where customer.firstName = "Bob" and customer.lastName = "Wilson"`
 
@@ -353,6 +376,7 @@ queryFactory.selectFrom(customer)
 ifdef::backend-revealjs[=== !]
 
 * Join (inner join, join, left join and right join) :
++
 [source,java]
 QCat cat = QCat.cat;
 QCat mate = new QCat("mate");
@@ -363,6 +387,7 @@ queryFactory.selectFrom(cat)
     .fetch()
 
 ** en JPQL, String (pas de type!)
++
 `select cat from Cat as cat
  inner join cat.mate as mate
  left outer join cat.kittens as kitten`
@@ -987,6 +1012,23 @@ select e from Employe e join fetch e.departement
 * UTILISER les Entity-Graph (JPA 2.1) !
 ** https://www.javacodegeeks.com/2014/05/jpa-2-1-entity-graph-part-1-named-entity-graphs.html
 ** https://www.javacodegeeks.com/2014/05/jpa-2-1-entity-graph-part-2-define-lazyeager-loading-at-runtime.html
+
+=== Entity Graph (JPA >= 2.1)
+
+[source,java]
+----
+@Entity
+@Table(name = "purchase_order")
+@NamedEntityGraph(name = "graph.Order.items",
+      attributeNodes = @NamedAttributeNode("items"))
+public class Order implements Serializable {
+}
+//...
+EntityGraph graph = this.em.getEntityGraph("graph.Order.items");
+Map hints = new HashMap();
+hints.put("javax.persistence.fetchgraph", graph);
+return this.em.find(Order.class, orderId, hints);
+----
 
 === Entity Graph (JPA >= 2.1)
 

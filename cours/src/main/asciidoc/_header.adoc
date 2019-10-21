@@ -5,15 +5,18 @@ ifndef::sourcedir[:sourcedir: ../java]
 ifndef::testsourcedir[:testsourcedir: ../../test/java]
 ifndef::resourcesdir[:resourcesdir: ../resources]
 // reveal options ; cf https://github.com/asciidoctor/asciidoctor-reveal.js/
-//:revealjs_theme: white
 //:revealjs_transition: linear
 :navigation:
 :menu:
 :status:
-:title-slide-background-image: summit.png
+//:title-slide-background-image: summit.png
 :title-slide-transition: zoom
 :title-slide-transition-speed: fast
 :icons: font
+:source-highlighter: highlightjs
+//:highlightjs-theme: css/monokai.css
+//:revealjs_theme: black
 :revealjs_center: true
 :revealjs_slideNumber: true
-:customcss: css/summit.css
+:revealjs_customtheme: themes/css/reveal-fred-container-dark.css
+//:customcss: css/summit.css
