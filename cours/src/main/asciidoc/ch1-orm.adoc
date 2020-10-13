@@ -22,13 +22,13 @@ Le but de la solution d'O[R]M sera d'alléger ou de "simplifier" ces problèmes
 == Historique
 
 [.timeline]
-* *1994* - TopLink [SmallTalk]
-* *1996* - TopLink [en Java]
+* *1994* - TopLink (SmallTalk)
+* *1996* - TopLink (Java)
 * *1998* - EJB 1.0
 * *2000* - EJB 2.0
 * *2001* - Hibernate
-* *2006* - EJB 3.0 et JPA 1.0
-* *2007* - TopLink devient EclipseLink
+* *2006* - EJB 3.0 / JPA 1.0
+* *2007* - TopLink => EclipseLink
 * *2009* - JPA 2.0
 * *2013* - JPA 2.1
 * *2017* - JPA 2.2
@@ -101,8 +101,10 @@ java -classpath lib/hibernate2.jar:$CLASSPATH \
 
 De même, outil de génération du schéma de la BD
 [source,shell script]
+----
 java -classpath hibernate2.jar:$CLASSPATH:lib/hsqldb.jar:bin \
  net.sf.hibernate.tool.hbm2ddl.SchemaExport BooksShelf.hbm
+----
 
 === Résultat
 
@@ -224,6 +226,7 @@ framework n'a été que peu utilisé !
 
 === Un processus d'enhancement
 
+[.big-image]
 image::jdo.png[]
 
 
@@ -833,6 +836,7 @@ public class Person {
 * Attribut orphanRemoval à true dans @OneToMany
 Suppression au moment du flush
 [source,java]
+----
 @Entity
 public class Facture {
   ...
@@ -841,6 +845,7 @@ public class Facture {
 	private Collection<LigneFacture> lignes;
 	...
 }
+----
 
 === JPA 2 : TypedQuery
 
@@ -1071,7 +1076,7 @@ Entités détachées :
 
 === Cycle de vie
 
-[.thumb]
+[.big-image]
 image::jpa-state.png[scaledwidth=100%]
 
 
@@ -1137,23 +1142,22 @@ http://deptinfo.unice.fr/~grin/mescours/minfo/modpersobj/supports/index.html
 
 === DAO
 
-* DAO
-** Contient TOUT le code lié à la persistance
-** Utilisé par la Facade/Service
-** En général, une DAO par Classe persistée (generics) ou par sous-domaine fonctionnel
-** CRUD : create, retrieve, update, delete
+* Contient TOUT le code lié à la persistance
+* Utilisé par la Facade/Service
+* En général, une DAO par Classe persistée (generics) ou par sous-domaine fonctionnel
+* CRUD : create, retrieve, update, delete
 * Paramètres
-** Suite de champs (id, nom, …)
-** VO
-** Objet métier
+** Suite de champs (id, nom, …), VO, Objet métier
 * Retour
-** Void, boolean, id, objet persisté ou VO,List, ResultSet…
+** void, boolean, id, objet persisté ou VO, List, ResultSet...
 
 === DAO : rôles
 
-Cacher les exceptions de bas niveau (SQL)
+* Cacher les exceptions de bas niveau (SQL)
 
-Gestion des transactions : dans DAO ou dans service si nécessité de plusieurs appels DAO (eg virement)
+* Gestion des transactions :
+** dans DAO
+** ou dans service si nécessité de plusieurs appels DAO (eg virement)
 
 
 

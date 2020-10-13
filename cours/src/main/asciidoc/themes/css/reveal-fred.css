@@ -625,7 +625,7 @@ span.hljs-comment, span.hljs-emphasis {
 .reveal section.maxed-image > div > img, .imageblock.maxed-image img {
     object-fit: contain;
     height: 550px;
-    width: 1040px;
+    width: 900px;
     padding: 0px; /* to disable padding that else gives space around images */
 }
 
@@ -633,7 +633,7 @@ span.hljs-comment, span.hljs-emphasis {
 .reveal section.big-image > div > img, .imageblock.big-image img {
   object-fit: contain;
   height: 420px;
-  width: 1040px;
+  width: 900px;
   /* we define margin instead of padding, because we need space for text */
   margin: 20px 0px;
   padding: 0px;

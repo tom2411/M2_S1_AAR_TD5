@@ -23,7 +23,7 @@ docker run --name mysql -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 -d mysql
 [source,bash]
 docker run -it --link mysql:mysql --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD"'
 
-** Création de la base : `create database banque;`
+** La base de données DOIT exister avant le run ! Création de la base : `create database banque;`
 
 == Full annotation avec Spring Boot
 
@@ -96,7 +96,7 @@ Les utilisateurs seront ici les clients, qui pourront se connecter ;
 il faut donc ajouter des informations dans l'entité Client pour permettre de gérer les connections :
 [source,java]
 ----
-	private String password;
+	private char[] password;
 	private boolean active;
 	@ElementCollection(fetch = EAGER)
 	@CollectionTable(name = "client_roles")
@@ -116,3 +116,5 @@ public PasswordEncoder encoder() {
 }
 ----
 Cet encoder sera utilisé par jdbcAuthentication et par la couche de service au moment de l'enregistrement des clients.
+
+Vérifier en base que les mots de passe ne sont pas en clair.

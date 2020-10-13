@@ -1,12 +1,11 @@
-= Introduction
+= module AAR - Introduction
 ifndef::masterdoc[]
 include::_header.adoc[]
 endif::masterdoc[]
 
 == Le cours
 
-La page web du cours : https://orleans.miage.fr/confluence/display/jee/
-
+Les documents de cours/tp : https://orleans.miage.fr/deploy/aar/
 
 CAUTION: Code source du cours en Asciidoc
 
@@ -14,7 +13,7 @@ https://pdicost.univ-orleans.fr/git/projects/AAR/repos/cours/
 
 pour générer les slides ET un support pdf : `mvn`
 
-pour prendre des notes : modifier le source par exemple avec une balise [NOTE]
+pour prendre des notes : modifier le source ; par exemple avec une balise [NOTE]
 
 
 
@@ -28,6 +27,7 @@ Une note .speaker est incluse dans le pdf généré mais n'apparait pas explicit
 * You can press `*b*` or `*.*` to blank/unblank your current screen
 * Press the `*esc*` key to get an overview of your slides
 * Press the down arrow key to see the next sub-slide (if exist !)
+...
 
 [NOTE.speaker]
 --
@@ -59,17 +59,17 @@ Les notes de slides sont visibles dans la fenêtre speaker, mais aussi dans le p
 == Historique
 
 [.stretch]
-[options="header", cols="<,<,<", width="100%"]
+[options="header", cols="<,<,<", width="90%"]
 |===================
-|JDK|JEE|Autre
+|JDK|JEE|Hibernate
 |JDK 1.0 : java.io, java.util.Properties
 
-JDK 1.1 : Sérialisation des objets, JDBC
+JDK 1.1 : Sérialisation, JDBC
 
 JSR 12, JDO 1.0, 2002
 
 JSR 243, JDO 2.0, 2006
-n
+
 JSR 222, JAXB 2.0, 2006
 
 |EJB 1.0, 1998, gestion des transactions distribuées
@@ -84,11 +84,11 @@ JSR 342, JEE 7, 2013 avec EJB 3.2, JPA 2.1, CDI 1.1
 
 |Hibernate, contre EJB2, 2001
 
-Hibernate 2, 2003 [JBoss]
+v2, 2003 [JBoss]
 
-Hibernate 3, 2005
+v3, 2005
 
-Hibernate 3.5, JPA 2.0
+v3.5, JPA 2.0
 
 Hibernate Core 4, 2011
 
@@ -102,8 +102,8 @@ Hibernate ORM 5, 2015, Java 8
 
 == Architectures n-tiers
 
-[.thumb]
-image::archi-n-tiers.png[scaledwidth=100%]
+[.maxed-image]
+image::archi-n-tiers.png[scalewidth=75%]
 
 
 == Persistance en BD
@@ -121,5 +121,5 @@ Attention, deux rôles bien distincts :
 
 == Architecture classique
 
-[.thumb]
+[.maxed-image]
 image::archi-classique.png[scaledwidth=75%]

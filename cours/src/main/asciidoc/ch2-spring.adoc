@@ -7,7 +7,7 @@ Containers légers vs containers lourds
 
 == Problématique
 
-[.thumb]
+[.big-image]
 image::archi-complete.png[scaledwidth=75%]
 
 - C’est gentil de faire X couches,
@@ -165,11 +165,12 @@ Comment initialiser `userService` ?
 
 * La méthode interdite : le NEW, c’est mal
 [source,java]
+----
 public class TodosServiceImpl {
     private MonSuperUserService userService =
         new MonSuperUserService(plein de params);
 }
- 
+----
 
 
 == Réponse classique : exemple de fabrique
@@ -528,13 +529,15 @@ of a single bean definition. [Only valid web-aware Spring ApplicationContext]
   ** Les variables de classe sont partagées entre les threads
   ** Les beans doivent donc être thread-safe
 [source,java]
+----
 @Service
 @Transactional
 public class TodosServiceImpl implements TodosService {
     @Inject
     private UserService userService;
 }
- 
+----
+
 
 == Les Scopes en VF…
 

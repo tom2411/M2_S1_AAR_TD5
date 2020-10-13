@@ -6,17 +6,15 @@
     <parent>
         <artifactId>aar</artifactId>
         <groupId>fr.univ.orleans.informatique.cours</groupId>
-        <version>2019.0-SNAPSHOT</version>
+        <version>2020.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>cours</artifactId>
 
     <properties>
-        <rubygems.prawn.version>2.0.2</rubygems.prawn.version>
-        <asciidoctor-revealjs.version>2.0.0</asciidoctor-revealjs.version>
-        <revealjs.version>3.8.0</revealjs.version>
+        <asciidoctor-revealjs.version>4.0.1</asciidoctor-revealjs.version>
+        <revealjs.version>3.9.2</revealjs.version>
         <project.slides.directory>${project.build.directory}/generated-slides</project.slides.directory>
-        <asciidoctorj-diagram.version>1.5.18</asciidoctorj-diagram.version>
     </properties>
     <dependencies>
         <dependency>
@@ -80,7 +78,7 @@
             <plugin>
                 <groupId>de.saumya.mojo</groupId>
                 <artifactId>gem-maven-plugin</artifactId>
-                <version>1.1.5</version>
+                <version>1.1.8</version>
                 <configuration>
                     <jrubyVersion>${jruby.version}</jrubyVersion>
                     <gemHome>${project.build.directory}/gems</gemHome>
@@ -122,7 +120,7 @@
                     <dependency>
                         <groupId>org.asciidoctor</groupId>
                         <artifactId>asciidoctorj-diagram</artifactId>
-                        <version>${asciidoctorj-diagram.version}</version>
+                        <version>${asciidoctorj.diagram.version}</version>
                     </dependency>
                 </dependencies>
                 <configuration>
@@ -138,6 +136,7 @@
                         <experimental/><!-- kbd / menu / btn macros -->
                         <sourcedir>${project.build.sourceDirectory}</sourcedir>
                         <project-version>${project.version}</project-version>
+                        <imagesoutdir>${project.basedir}/src/main/asciidoc/images</imagesoutdir>
                     </attributes>
                 </configuration>
                 <executions>
@@ -160,7 +159,7 @@
                                 <revealjsdir>reveal.js-${revealjs.version}</revealjsdir>
                                 <!-- put here the reveal.js specific attributes -->
                                 <source-highlighter>highlightjs</source-highlighter>
-                                <highlightjs-theme>lib/highlight/styles/gruvbox-dark.min.css</highlightjs-theme>
+                                <highlightjs-theme>lib/highlight/styles/vs.min.css</highlightjs-theme>
                                 <sourcedir>${basedir}/src/main/java</sourcedir>
                                 <!--                            defined in the source
                                                                 <revealjs_theme>black</revealjs_theme>

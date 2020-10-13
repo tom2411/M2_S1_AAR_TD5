@@ -5,7 +5,7 @@ endif::masterdoc[]
 
 Petite introduction à la sécurité avec Spring
 
-== Pré-requis
+== pré-Requis
 
 Avant de sécuriser votre application, il faut avant sécuriser le contexte !
 
@@ -17,6 +17,56 @@ Avant de sécuriser votre application, il faut avant sécuriser le contexte !
 
 * Lecture de https://spring.io/guides/topicals/spring-security-architecture/
 
+=== Outils https
+
+* Let’s Encrypt offers free HTTPS certificates
+* `certbot` pour générer des certificats
+* `mkcert` peut être utilisé pour créer des certificats sur localhost
+* Spring Boot Starter ACME https://github.com/creactiviti/spring-boot-starter-acme
+
+
+=== en Spring Boot
+
+[source,java]
+----
+@Configuration
+public class SecurityConfiguration extends
+    WebSecurityConfigurerAdapter {
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.requiresChannel().anyRequest().requiresSecure();
+    }
+}
+----
+
+ifdef::backend-revealjs[=== !]
+
+[source,java]
+----
+@Configuration
+public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.requiresChannel()
+            .requestMatchers(r -> r.getHeader("X-Forwarded-Proto") != null)
+            .requiresSecure();
+    }
+}
+----
+
+=== Le contexte applicatif
+
+[%step]
+* Votre code < 10% lignes de votre application
+* Pensez à patcher les versions des dépendances
++
+[source,shell script]
+----
+mvn versions:display-dependency-updates
+----
+
+
+
 
 
 == Spring Security
@@ -24,7 +74,7 @@ Avant de sécuriser votre application, il faut avant sécuriser le contexte !
 === Introduction à Spring Security
 
 *  Spring Security permet de sécuriser des applications Spring,
-en particulier dans un environnement Java EE
+en particulier dans un environnement Java
 *  Il fonctionne dans tous les serveurs d’applications
 **  Il vient alors remplacer la sécurité standard Java EE
 **  Il est très répandu en production, car il propose des fonctionnalités particulièrement avancées
@@ -49,7 +99,7 @@ fonction de l’environnement est très utile pour un framework de sécurité
 ifdef::backend-revealjs[=== !]
 
 *  Il est portable d’un serveur à un autre
-*  Il propose une large palette de plugins : utilisation de solutions de
+*  Il propose une large palette de *plugins* : utilisation de solutions de
 SSO (CAS), de la sécurité Windows (NTLM), de OpenID...
 *  Il fournit de nombreux services non disponibles avec Java EE :
 gestion des cookies «remember me», sécurité des instances d’
@@ -80,6 +130,7 @@ LDAP et les autorisations en base de données
 *  Spring Security est un filtre de Servlet, qui peut se configurer
 via le fichier web.xml
 [source,xml]
+----
 <filter>
     <filter-name>springSecurityFilterChain</filter-name>
     <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
@@ -88,7 +139,7 @@ via le fichier web.xml
     <filter-name>springSecurityFilterChain</filter-name>
     <url-pattern>/*</url-pattern>
 </filter-mapping>
-
+----
 
 === Fonctionnement interne
 
@@ -172,13 +223,13 @@ spécialisé]
 <intercept-url pattern="/app/admin" access="ROLE_ADMIN"/>
 <intercept-url pattern="/app/**" access="ROLE_USER"/>
 <form-login login-processing-url="/login"
-login-page="/welcome"
-authentication-failure-url="/welcome?authentication=failure"
-default-target-url="/app/index"/>
+    login-page="/welcome"
+    authentication-failure-url="/welcome?authentication=failure"
+    default-target-url="/app/index"/>
 <logout logout-url="/logout"/>
 </http>
 <authentication-manager alias="authenticationManager">
-<authentication-provider user-service-ref="userDetailsService"/>
+    <authentication-provider user-service-ref="userDetailsService"/>
 </authentication-manager>
 ----
 
@@ -249,13 +300,15 @@ group-search-base="ou=groups" />
 
 *  Voici la configuration, les requêtes SQL étant paramétrables
 [source,xml]
+----
 <authentication-manager>
 <authentication-provider>
 <jdbc-user-service data-source-ref= "dataSource"
-users-by-username-query= "..."
-authorities-by-username-query= "..."/>
+    users-by-username-query= "..."
+    authorities-by-username-query= "..."/>
 </authentication-provider>
 </authentication-manager>
+----
 
 ifdef::backend-revealjs[=== !]
 
@@ -275,6 +328,7 @@ directement dans la configuration Spring
 facilement ajouter ou modifier des utilisateurs avec des droits
 spécifiques
 [source,xml]
+----
 <authentication-manager>
 <authentication-provider>
 <user-service>
@@ -283,7 +337,7 @@ spécifiques
 </user-service>
 </authentication-provider>
 </authentication-manage>
-
+----
 
 
 === Utilisation dans une page Web
@@ -298,13 +352,14 @@ ifdef::backend-revealjs[=== !]
 
 *  Spring Security propose également sa propre Tag Lib, avec
 une API plus élaborée :
+----
 <sec:authorize access="hasRole('ROLE_ADMIN')">
-Seul un administrateur peut voir ce texte !
+ Seul un administrateur peut voir ce texte !
 </sec:authorize>
 <sec:authorize url="/admin">
-Seule une personne pouvant voir l'URL "/admin" peut voir ce texte !
+ Seule une personne pouvant voir l'URL "/admin" peut voir ce texte !
 </sec:authorize>
-
+----
 
 
 === Sécurisation de méthodes Java
@@ -489,9 +544,36 @@ public class MyService {
 
 ifdef::backend-revealjs[=== !]
 
-Pour des contraintes plus complexes, on utilise
-`@PreAuthorize` et `@PostAuthorize` avec des expressions.
+Equivalent en JSR-250 (jsr250Enabled = true) :
 
+[source,java]
+----
+@RolesAllowed("ROLE_VIEWER")
+public String getUsername2() {
+    //...
+}
+@RolesAllowed({ "ROLE_VIEWER", "ROLE_EDITOR" })
+public boolean isValidUsername2(String username) {
+    //...
+}
+----
+
+ifdef::backend-revealjs[=== !]
+
+Pour des contraintes plus complexes, on utilise
+`@PreAuthorize` et `@PostAuthorize` avec des expressions (prePostEnabled = true) :
+
+[source,java]
+----
+@PreAuthorize("hasRole('ROLE_VIEWER') or hasRole('ROLE_EDITOR')")
+public boolean isValidUsername3(String username) {
+    //...
+}
+@PreAuthorize("#username == authentication.principal.username")
+public String getMyRoles(String username) {
+    //...
+}
+----
 
 
 === Utilisation Web
@@ -770,7 +852,116 @@ security:
 
 
 
-=== Conclusion sur Spring Security
+
+
+== bonnes pratiques Default
+
+
+
+=== Activer CSRF
+
+[source,java]
+----
+@EnableWebSecurity
+public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+            .csrf()
+            .csrfTokenRepository(
+                CookieCsrfTokenRepository.withHttpOnlyFalse());
+    }
+}
+----
+
+=== Utiliser un CSP
+
+Headers par défaut de Spring Sec :
+----
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Frame-Options: DENY
+X-XSS-Protection: 1; mode=block
+----
+
+ifdef::backend-revealjs[=== !]
+
+[source,java]
+----
+@EnableWebSecurity
+public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.headers()
+            .contentSecurityPolicy("script-src 'self' " +
+                "https://trustedscripts.example.com; " +
+                "object-src https://trustedplugins.example.com; " +
+                "report-uri /csp-report-endpoint/");
+    }
+}
+----
+
+Pour tester : https://securityheaders.com
+
+
+=== Utiliser OIDC
+
+Surcouche à OAuth 2 permettant de récupérer un user ID token
+transformé automatiquement par Spring Sec en Principal injectable !
+[.max-image]
+image::oidc-flow.png[]
+
+=== OIDC config
+
+[source,yaml]
+----
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          okta:
+            client-id: {clientId}
+            client-secret: {clientSecret}
+        provider:
+          okta:
+            issuer-uri: https://{yourOktaDomain}/oauth2/default
+----
+
+=== Définir un PasswordEncoder
+
+[source,java]
+----
+// config
+@Bean
+public PasswordEncoder passwordEncoder() {
+return new SCryptPasswordEncoder();
+}
+// injection
+@Autowired
+private PasswordEncoder passwordEncoder;
+public String hashPassword(String password) {
+    return passwordEncoder.encode(password);
+}
+----
+
+=== Password
+
+* JAMAIS en String [immutable]
+* toujours char[]
+
+=== Tests
+
+Utiliser ZAP pour tester les vulnérabilités de votre site
+
+https://github.com/zaproxy/zaproxy
+
+
+
+== Conclusion sur Spring Security
 
 *  Spring Security est un framework de sécurité robuste et très
 répandu en entreprise
