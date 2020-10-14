@@ -112,7 +112,7 @@ public class Livret extends Compte {
     </persistence-unit>
 </persistence>
 ----
-Attention, il faut que votre database existe avant de lancer votre programme !
+Attention, il faut que votre database `banque` existe avant de lancer votre programme ! (`create database banque` dans le client MySQL)
 
 . Ajoutez un programme principal Main, qui créé un persitence manager et persiste 2 clients, avec un compte pour le premier, un compte et un livret pour le deuxième.
 Vérifiez dans la BD les structures de la BD et les tuples ajoutés.
