@@ -40,8 +40,10 @@
                 <configuration>
                     <sourceDirectory>src/main/asciidoc</sourceDirectory>
                     <!-- Attributes common to all output formats -->
+
                     <attributes>
                         <sourcedir>${project.build.sourceDirectory}</sourcedir>
+                        <imagesoutdir>${project.basedir}/src/main/asciidoc/images</imagesoutdir>
                     </attributes>
                 </configuration>
                 <executions>

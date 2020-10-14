@@ -1,7 +1,7 @@
 = AAR TP8 : Tests
 Frédéric Moal <frederic.moal@univ-orleans.fr>
 v1.1, 2018-10-26: migration Spring 5
-ifndef::imagesdir[:imagesdir: ../images]
+ifndef::imagesdir[:imagesdir: ./images]
 ifndef::sourcedir[:sourcedir: ../java]
 ifndef::resourcesdir[:resourcesdir: ../resources]
 

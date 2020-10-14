@@ -1,7 +1,7 @@
 = AAR TP7 : Spring Boot
 Frédéric Moal <frederic.moal@univ-orleans.fr>
 v2.0, 2018-11-06: nouveau sujet
-ifndef::imagesdir[:imagesdir: ../images]
+ifndef::imagesdir[:imagesdir: ./images]
 ifndef::sourcedir[:sourcedir: ../java]
 ifndef::resourcesdir[:resourcesdir: ../resources]
 ifndef::masterdoc[]

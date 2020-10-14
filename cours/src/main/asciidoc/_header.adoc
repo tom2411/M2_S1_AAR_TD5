@@ -18,5 +18,5 @@ ifndef::resourcesdir[:resourcesdir: ../resources]
 //:revealjs_theme: black
 :revealjs_center: true
 :revealjs_slideNumber: true
-:revealjs_customtheme: themes/css/reveal-fred-security.css
+:revealjs_customtheme: themes/css/reveal-fred-container.css
 //:customcss: css/summit.css
