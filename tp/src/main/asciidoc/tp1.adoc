@@ -51,8 +51,8 @@ image::tp1-archi1.png[scaledwidth=100%]
 . Créer un nouveau projet de type Maven, sans archetype
 
 . Dans le pom.xml, ajoutez dans les dépendances ( http://search.maven.org ) :
-* le driver JDBC MySQL pour accéder à la base (mysql:mysql-connector-java:8.0.12)
-* le gestionnaire de persistence JPA, ici eclipseLink : org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.3
+* le driver JDBC MySQL pour accéder à la base (mysql:mysql-connector-java:8.0.21)
+* le gestionnaire de persistence JPA, ici eclipseLink : org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.7
 * définissez les sources du projet en java 8 [ou 11 ou 14]:
 +
 [source,xml]
