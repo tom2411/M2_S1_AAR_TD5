@@ -163,13 +163,13 @@ Pour que cela fonctionne, il faut bien sûr ajouter les dépendances de Hibernat
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>fr.miage.orleans.aar</groupId>
+    <groupId>fr.univ.orleans.aar</groupId>
     <artifactId>tp2exo1</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -177,27 +177,27 @@ Pour que cela fonctionne, il faut bien sûr ajouter les dépendances de Hibernat
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.44</version>
+            <version>8.0.21</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
-            <version>5.2.12.Final</version>
+            <version>5.4.23.Final</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-orm</artifactId>
-            <version>5.0.1.RELEASE</version>
+            <version>5.2.5.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId>
-            <version>5.0.1.RELEASE</version>
+            <version>5.2.5.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>5.0.1.RELEASE</version>
+            <version>5.2.5.RELEASE</version>
         </dependency>
     </dependencies>
 </project>
