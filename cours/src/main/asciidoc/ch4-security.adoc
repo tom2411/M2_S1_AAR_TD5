@@ -811,7 +811,7 @@ et la doc en ligne
 https://docs.spring.io/spring-security-oauth2-boot/
 
 
-=== OAuth2 Client
+=== OAuth2 modele.Client
 
 Configuration "simple"
 [source,xml]

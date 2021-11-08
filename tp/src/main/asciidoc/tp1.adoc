@@ -64,23 +64,23 @@ image::tp1-archi1.png[scaledwidth=100%]
     </properties>
 ----
 
-. Créez les classes [persistantes] Client, Compte, Livret dans un package modele :
+. Créez les classes [persistantes] modele.Client, modele.Compte, modele.Livret dans un package modele :
 +
 [source,java]
-public class Client {
+public class modele.Client {
     private long id;
     private String nom;
     private String prenom;
     private String adresse;
-    private Collection<Compte> comptes;
+    private Collection<modele.Compte> comptes;
 }
-public class Compte {
+public class modele.Compte {
     private long id;
-    private Client titulaire;
+    private modele.Client titulaire;
     private double solde;
     private Date dateOuverture;
 }
-public class Livret extends Compte {
+public class modele.Livret extends modele.Compte {
     private double tauxInteret;
 }
 
@@ -129,8 +129,8 @@ Vérifiez dans la BD les structures de la BD et les tuples ajoutés.
 
 . Supprimez une instance persistante.
 
-. Recherchez un Compte par son Id : on passe en paramètre du programme une référence (chaine)
-et il affiche le Compte et le Client s'il le trouve.
+. Recherchez un modele.Compte par son Id : on passe en paramètre du programme une référence (chaine)
+et il affiche le modele.Compte et le modele.Client s'il le trouve.
 
 . Modifiez le type du champ dateOuverture : utilisez `LocalDate` à la place de `Date` ;
 recommencez le mapping et regardez la différence sur le schéma de la BD.
@@ -226,32 +226,32 @@ public class InitDBjse {
         dumpLivrets();
         dumpClientsComptes();
     }
-    // affichage contenu table Client
+    // affichage contenu table modele.Client
     private static void dumpClients() {
         System.out.format("[Clients]%n");
-        for (Client c : service.getAllClients()) {
+        for (modele.Client c : service.getAllClients()) {
             System.out.println(c);
         }
     }
-    // affichage contenu table Livret
+    // affichage contenu table modele.Livret
     private static void dumpLivrets() {
         System.out.format("[Livrets]%n");
-        for (Livret a : service.getAllLivrets()) {
+        for (modele.Livret a : service.getAllLivrets()) {
             System.out.println(a);
         }
     }
     // affichage contenu table Activite
     private static void dumpComptes() {
-        System.out.format("[Compte]%n");
-        for (Compte a : service.getAllComptes()) {
+        System.out.format("[modele.Compte]%n");
+        for (modele.Compte a : service.getAllComptes()) {
             System.out.println(a);
         }
     }
-    // affichage Client->Comptes
+    // affichage modele.Client->Comptes
     private static void dumpClientsComptes() {
         System.out.println("[Clients/comptes]");
-        for (Client p : service.getAllClients()) {
-            for (Compte a : service.getComptesOfClient(p.getId())) {
+        for (modele.Client p : service.getAllClients()) {
+            for (modele.Compte a : service.getComptesOfClient(p.getId())) {
                 System.out.format("[%s,%s]%n", p.getNom(), a.getId());
             }
         }
@@ -259,23 +259,23 @@ public class InitDBjse {
     // remplissage tables
     public static void fill() throws ParseException {
         // création Clients
-        Client c1 = new Client(1003, "Martin", "Paul", "Orléans");
-        Client c2 = new Client(1015, "Dupont", "Sylvie", "Olivet");
-        Client c3 = new Client(1109, "Dupond", "Henri", "La ferté");
+        modele.Client c1 = new modele.Client(1003, "Martin", "Paul", "Orléans");
+        modele.Client c2 = new modele.Client(1015, "Dupont", "Sylvie", "Olivet");
+        modele.Client c3 = new modele.Client(1109, "Dupond", "Henri", "La ferté");
 
         // ajout des Comptes/Livrets
-        c1.addCompte(new Compte(198,c1, new SimpleDateFormat("dd/MM/yy").parse("31/01/2010"),2300.0));
-        c2.addCompte(new Compte(203,c2, new SimpleDateFormat("dd/MM/yy").parse("05/07/2001"),5440.0));
-        c2.addCompte(new Livret(205,c2, new SimpleDateFormat("dd/MM/yy").parse("05/07/2011"),655.0,0.05));
-        c3.addCompte(new Compte(243,c3, new SimpleDateFormat("dd/MM/yy").parse("25/12/2013"),450.0));
+        c1.addCompte(new modele.Compte(198,c1, new SimpleDateFormat("dd/MM/yy").parse("31/01/2010"),2300.0));
+        c2.addCompte(new modele.Compte(203,c2, new SimpleDateFormat("dd/MM/yy").parse("05/07/2001"),5440.0));
+        c2.addCompte(new modele.Livret(205,c2, new SimpleDateFormat("dd/MM/yy").parse("05/07/2011"),655.0,0.05));
+        c3.addCompte(new modele.Compte(243,c3, new SimpleDateFormat("dd/MM/yy").parse("25/12/2013"),450.0));
         // persistance des Clients avec leurs comptes/livrets
-        service.saveClients(new Client[]{c1,c2,c3});
+        service.saveClients(new modele.Client[]{c1,c2,c3});
     }
     // suppression de tous les éléments
     public static void clean() {
         // on supprime ttes les Clients et donc toutes les Comptes
-        for (Client Client : service.getAllClients()) {
-            service.deleteClient(Client.getId());
+        for (modele.Client modele.Client : service.getAllClients()) {
+            service.deleteClient(modele.Client.getId());
         }
     }
 }

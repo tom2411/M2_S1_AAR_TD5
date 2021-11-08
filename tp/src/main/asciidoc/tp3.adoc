@@ -19,7 +19,7 @@ endif::masterdoc[]
 [source,bash]
 docker run --name mysql -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 -d mysql
 
-** Client Mysql avec docker :
+** modele.Client Mysql avec docker :
 [source,bash]
 docker run -it --link mysql:mysql --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD"'
 
@@ -93,7 +93,7 @@ cf https://spring.io/guides/gs/serving-web-content/
 * Configurez le projet pour stocker les utilisateurs dans la BD MySQL
 
 Les utilisateurs seront ici les clients, qui pourront se connecter ;
-il faut donc ajouter des informations dans l'entité Client pour permettre de gérer les connections :
+il faut donc ajouter des informations dans l'entité modele.Client pour permettre de gérer les connections :
 [source,java]
 ----
 	private char[] password;

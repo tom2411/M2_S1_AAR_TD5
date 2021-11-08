@@ -437,7 +437,7 @@ public class ClientDaoTest extends AbstractDaoTest {
   private ClientDao clientDao;
   @Test
   public void testCount() {
-    assertEquals("Client Nb", 3, clientDao.count());
+    assertEquals("modele.Client Nb", 3, clientDao.count());
   }
   @Test
   public void testFind() {
@@ -454,7 +454,7 @@ public class ClientDaoTest extends AbstractDaoTest {
 @Test
 public void testNbComptes() {
   Client client = clientDao.find(1015L);
-  Collection<Compte> comptes = client.getComptes();
+  Collection<modele.Compte> comptes = client.getComptes();
   assertEquals("nbComptes", 2, comptes.size());
 }
 @Test

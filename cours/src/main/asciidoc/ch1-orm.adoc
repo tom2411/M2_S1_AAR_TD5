@@ -1108,7 +1108,7 @@ public class Client_ {
 	public static volatile SingularAttribute<Client, String> nom;
 	public static volatile SingularAttribute<Client, String> prenom;
 	public static volatile SingularAttribute<Client, String> adresse;
-	public static volatile CollectionAttribute<Client, Compte> comptes;
+	public static volatile CollectionAttribute<Client, modele.Compte> comptes;
 }
 ----
 

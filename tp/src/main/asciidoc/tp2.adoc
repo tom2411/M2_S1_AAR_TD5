@@ -21,7 +21,7 @@ image::tp2arch1.png[scaledwidth=100%]
 [source,bash]
 docker run --name mysql -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 -d mysql:5
 
-** Client Mysql avec docker :
+** modele.Client Mysql avec docker :
 [source,bash]
 docker exec -it mysql mysql -u root -p
 
@@ -107,23 +107,23 @@ et jpa/AbstractDaoImpl.java :
 include::{sourcedir}/dao/jpa/AbstractDaoImpl.java[]
 ----
 
-Il suffit d'instancier pour chacune des 3 entités (Client, Compte, Livret) une interface et une classe d'implémentation ;
-voici par exemple la code de la DAO pour l'entité Client :
+Il suffit d'instancier pour chacune des 3 entités (modele.Client, modele.Compte, modele.Livret) une interface et une classe d'implémentation ;
+voici par exemple la code de la DAO pour l'entité modele.Client :
 
 [source,java]
 ----
 // exemple de ClientDao
 
 // l'interface :
-public interface ClientDao extends AbstractDao<Client> {
+public interface ClientDao extends AbstractDao<modele.Client> {
 }
 
 // puis l'implémentation JPA :
-public class ClientDaoImpl extends AbstractDaoImpl<Client> implements ClientDao {
+public class ClientDaoImpl extends AbstractDaoImpl<modele.Client> implements ClientDao {
     public ClientDaoImpl() {
-        this(Client.class);
+        this(modele.Client.class);
     }
-    public ClientDaoImpl(Class<Client> entityClass) {
+    public ClientDaoImpl(Class<modele.Client> entityClass) {
         super(entityClass);
     }
 }
@@ -243,34 +243,34 @@ public class SpringRun {
     private static void virement() {
         service.virement(198, 205, 690.00);
     }
-    // affichage contenu table Client
+    // affichage contenu table modele.Client
     private static void dumpClients() {
         System.out.format("[Clients]%n");
-        for (Client c : service.getAllClients()) {
+        for (modele.Client c : service.getAllClients()) {
             System.out.print(c);
-            Client c2 = service.getClient(c.getId());
+            modele.Client c2 = service.getClient(c.getId());
             System.out.println("|"+c2);
         }
     }
-    // affichage contenu table Livret
+    // affichage contenu table modele.Livret
     private static void dumpLivrets() {
         System.out.format("[Livrets]%n");
-        for (Livret a : service.getAllLivrets()) {
+        for (modele.Livret a : service.getAllLivrets()) {
             System.out.println(a);
         }
     }
     // affichage des comptes
     private static void dumpComptes() {
-        System.out.format("[Compte]%n");
-        for (Compte a : service.getAllComptes()) {
+        System.out.format("[modele.Compte]%n");
+        for (modele.Compte a : service.getAllComptes()) {
             System.out.println(a);
         }
     }
     // affichage des clients, avec leurs comptes respectifs
     private static void dumpClientsComptes() {
         System.out.println("[Clients/comptes]");
-        for (Client p : service.getAllClients()) {
-            for (Compte a : service.getComptesOfClient(p.getId())) {
+        for (modele.Client p : service.getAllClients()) {
+            for (modele.Compte a : service.getComptesOfClient(p.getId())) {
                 System.out.format("[%s,%s]%n", p.getNom(), a.getId());
             }
         }
@@ -278,23 +278,23 @@ public class SpringRun {
     // remplissage tables
     public static void fill() throws ParseException {
         // crï¿½ation Clients
-        Client c1 = new Client(1003, "Martin", "Paul", "Orléans");
-        Client c2 = new Client(1015, "Dupont", "Sylvie", "Olivet");
-        Client c3 = new Client(1109, "Dupond", "Henri", "La ferté");
+        modele.Client c1 = new modele.Client(1003, "Martin", "Paul", "Orléans");
+        modele.Client c2 = new modele.Client(1015, "Dupont", "Sylvie", "Olivet");
+        modele.Client c3 = new modele.Client(1109, "Dupond", "Henri", "La ferté");
 
         // ajout des Comptes/Livrets
-        c1.addCompte(new Compte(198,c1,2300.0,new SimpleDateFormat("dd/MM/yy").parse("31/01/2010")));
-        c2.addCompte(new Compte(203,c2,5440.0,new SimpleDateFormat("dd/MM/yy").parse("05/07/2001")));
-        c2.addCompte(new Livret(205,c2, 655.0,new SimpleDateFormat("dd/MM/yy").parse("05/07/2011"),0.05));
-        c3.addCompte(new Compte(243,c3, 450.0,new SimpleDateFormat("dd/MM/yy").parse("25/12/2013")));
+        c1.addCompte(new modele.Compte(198,c1,2300.0,new SimpleDateFormat("dd/MM/yy").parse("31/01/2010")));
+        c2.addCompte(new modele.Compte(203,c2,5440.0,new SimpleDateFormat("dd/MM/yy").parse("05/07/2001")));
+        c2.addCompte(new modele.Livret(205,c2, 655.0,new SimpleDateFormat("dd/MM/yy").parse("05/07/2011"),0.05));
+        c3.addCompte(new modele.Compte(243,c3, 450.0,new SimpleDateFormat("dd/MM/yy").parse("25/12/2013")));
         // persistance des Clients avec leurs comptes/livrets
-        service.saveClients(new Client[]{c1,c2,c3});
+        service.saveClients(new modele.Client[]{c1,c2,c3});
     }
     // supression de tous les clients
     public static void clean() {
         // on supprime ttes les Clients et donc toutes les Comptes
-        for (Client Client : service.getAllClients()) {
-            service.deleteClient(Client.getId());
+        for (modele.Client modele.Client : service.getAllClients()) {
+            service.deleteClient(modele.Client.getId());
         }
     }
 }
